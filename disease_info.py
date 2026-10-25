@@ -967,6 +967,9 @@ def get_disease_info(class_name: str) -> dict:
     info = DISEASE_DB.get(class_name)
     if info:
         return info
+    for k, v in DISEASE_DB.items():
+        if k.lower() == class_name.lower():
+            return v
     # Fallback parser if not found
     parts = class_name.split('___')
     crop = parts[0].replace('_', ' ').strip()
