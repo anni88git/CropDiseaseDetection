@@ -665,7 +665,7 @@
   </div>
 
   <script>
-    const API_BASE = (window.location.protocol === 'file:' || !window.location.port) ? 'http://localhost:8080' : '';
+    const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:8080' : '';
     let currentFile = null;
     let currentSample = null;
     let currentDiagnosis = null;
@@ -847,7 +847,7 @@
         alert('Server connection error. Make sure server is running on ' + API_BASE);
       } finally {
         btn.disabled = false;
-        text.textContent = 'Run MobileNetV2 Analysis';
+        text.textContent = 'Run Vision Transformer Analysis';
         spinner.style.display = 'none';
         laser.classList.remove('active');
       }

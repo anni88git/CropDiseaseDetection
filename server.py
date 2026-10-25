@@ -161,7 +161,7 @@ def run_model_inference(image: Image.Image):
         "telemetry": {
             "latency_ms": latency_ms,
             "input_resolution": f"{image.width}x{image.height}",
-            "model_architecture": "MobileNetV2 (Fine-Tuned Transfer Learning)",
+            "model_architecture": "Vision Transformer (ViT-Base-Patch16-224 · 98.97% Accuracy)",
             "classes_evaluated": len(CLASS_NAMES)
         }
     }
@@ -258,7 +258,22 @@ class ChatRequest(BaseModel):
     user_purpose: Optional[str] = "Detection"
     context: Optional[str] = None
 
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
+def _get_groq_key():
+    key = os.environ.get("GROQ_API_KEY")
+    if key:
+        return key.strip()
+    env_file = os.path.join(BASE_DIR, ".env")
+    if os.path.exists(env_file):
+        try:
+            with open(env_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.startswith("GROQ_API_KEY="):
+                        return line.split("=", 1)[1].strip().strip('"').strip("'")
+        except Exception:
+            pass
+    return ""
+
+GROQ_API_KEY = _get_groq_key()
 
 @app.post("/api/chat")
 async def chat_with_bot(req: ChatRequest):
