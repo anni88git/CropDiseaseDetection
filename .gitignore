@@ -4,9 +4,14 @@ __pycache__/
 *.png
 !static/images/*.png
 !static/samples/*.png
+!research_paper_assets/*.png
 .env
 .venv
 env/
 venv/
 .DS_Store
 .tempmediaStorage/
+*.zip
+best_vit_plant_model/training_args.bin
+best_vit_plant_model/model.safetensors
+*.safetensors

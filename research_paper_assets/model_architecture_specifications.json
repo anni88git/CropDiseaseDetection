@@ -1,0 +1,18 @@
+{
+    "Model Architecture": "Vision Transformer (google/vit-base-patch16-224)",
+    "Patch Size": "16x16",
+    "Hidden Dimension (D)": 768,
+    "Number of Attention Heads": 12,
+    "Number of Transformer Layers": 12,
+    "Total Parameters": "85,827,878",
+    "Trainable Parameters": "85,827,878",
+    "Model Size on Disk (MB)": 327.43,
+    "Mean Inference Latency (ms)": 11.3,
+    "Inference Throughput (FPS)": 88.5,
+    "Dataset": "PlantVillage (38 Classes) + PlantDoc In-Field Real-World Injected",
+    "Total Training Images": 61237,
+    "Total Validation Images": 10807,
+    "Batch Size": 32,
+    "Learning Rate": 5e-05,
+    "Optimizer": "AdamW (weight_decay=0.01)"
+}

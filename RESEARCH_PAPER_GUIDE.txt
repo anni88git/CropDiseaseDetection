@@ -1,0 +1,37 @@
+RESEARCH PAPER ASSETS GUIDE
+========================================================================================
+
+Section 3: Methodology / System Specs
+Asset: model_architecture_specifications.json
+Purpose:
+- Exact specs, patch size (16x16), heads (12), hidden dim (768), FPS, parameter count, dataset split.
+- Use to write Section 3 (Architecture, Experimental Setup, Benchmark Latency & Throughput).
+
+Section 4: Training Convergence
+Asset: figure1_learning_curves.png (300 DPI)
+Purpose:
+- Proof that loss converged smoothly and validation accuracy steadily increased without severe overfitting across epochs.
+- Use as Figure 1 in the empirical analysis section.
+
+Section 4: Performance Analysis
+Asset: figure2_confusion_matrix_38classes.png (300 DPI)
+Purpose:
+- Full 38x38 normalized confusion matrix showing sharp diagonal dominance (clean predictions across laboratory and real-field samples).
+- Use as Figure 2 to demonstrate multi-crop robustness.
+
+Section 4: Comparative Results Table
+Asset: table2_per_class_classification_metrics.csv & table2_per_class_metrics.tex
+Purpose:
+- Precision, Recall, and F1-score for every single crop disease category (38 classes).
+- Includes Macro Average (0.9897) and Weighted Average (0.9898).
+- table2_per_class_metrics.tex is already formatted in raw LaTeX table code, ready to paste into Overleaf / IEEE / Springer LaTeX templates.
+
+========================================================================================
+TRAINED MODEL BENCHMARK SUMMARY:
+- Architecture: Vision Transformer (ViT-Base-Patch16-224)
+- Total Classes: 38 (Fruit, Vegetable, Field crops)
+- Dataset: PlantVillage (Laboratory) + PlantDoc (In-Field Real-World Injected)
+- Validation Dataset: 10,807 images
+- Validation Accuracy: 98.97%
+- Macro Precision / Recall / F1: 0.9897 / 0.9897 / 0.9897
+========================================================================================

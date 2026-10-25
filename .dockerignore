@@ -7,3 +7,6 @@ __pycache__
 .env
 SomeTestImages/
 *.ipynb
+*.zip
+model_4_mobilenet_finetuned.keras
+best_vit_plant_model/training_args.bin

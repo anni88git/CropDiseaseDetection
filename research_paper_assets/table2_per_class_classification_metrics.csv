@@ -1,0 +1,41 @@
+Class ID,Class Name,Precision,Recall,F1-Score,Support (Test Count)
+0,Apple___Apple_scab,0.9914,0.9885,0.99,349
+1,Apple___Black_rot,1.0,0.9966,0.9983,291
+2,Apple___Cedar_apple_rust,0.993,0.986,0.9895,286
+3,Apple___healthy,0.991,1.0,0.9955,330
+4,Blueberry___healthy,0.9962,1.0,0.9981,260
+5,Cherry_(including_sour)___Powdery_mildew,1.0,1.0,1.0,276
+6,Cherry_(including_sour)___healthy,0.9927,0.9964,0.9945,274
+7,Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot,0.9549,0.951,0.953,245
+8,Corn_(maize)___Common_rust_,1.0,0.9836,0.9917,304
+9,Corn_(maize)___Northern_Leaf_Blight,0.9544,0.9721,0.9632,323
+10,Corn_(maize)___healthy,1.0,1.0,1.0,322
+11,Grape___Black_rot,1.0,1.0,1.0,286
+12,Grape___Esca_(Black_Measles),1.0,1.0,1.0,291
+13,Grape___Leaf_blight_(Isariopsis_Leaf_Spot),1.0,1.0,1.0,257
+14,Grape___healthy,1.0,1.0,1.0,268
+15,Orange___Haunglongbing_(Citrus_greening),1.0,1.0,1.0,318
+16,Peach___Bacterial_spot,1.0,0.9961,0.9981,258
+17,Peach___healthy,0.9962,1.0,0.9981,260
+18,"Pepper,_bell___Bacterial_spot",0.9967,0.9803,0.9884,304
+19,"Pepper,_bell___healthy",0.991,0.997,0.994,333
+20,Potato___Early_blight,0.993,0.9595,0.9759,296
+21,Potato___Late_blight,0.9742,0.9742,0.9742,271
+22,Potato___healthy,0.9964,1.0,0.9982,276
+23,Raspberry___healthy,1.0,1.0,1.0,264
+24,Soybean___healthy,1.0,0.9969,0.9984,318
+25,Squash___Powdery_mildew,1.0,1.0,1.0,254
+26,Strawberry___Leaf_scorch,1.0,1.0,1.0,282
+27,Strawberry___healthy,1.0,1.0,1.0,250
+28,Tomato___Bacterial_spot,0.9469,0.9587,0.9528,242
+29,Tomato___Early_blight,0.97,0.9818,0.9758,329
+30,Tomato___Late_blight,0.966,0.9861,0.9759,288
+31,Tomato___Leaf_Mold,0.9738,0.9848,0.9793,264
+32,Tomato___Septoria_leaf_spot,0.9823,0.972,0.9772,286
+33,Tomato___Spider_mites Two-spotted_spider_mite,1.0,1.0,1.0,241
+34,Tomato___Target_Spot,0.9961,1.0,0.998,255
+35,Tomato___Tomato_Yellow_Leaf_Curl_Virus,0.9901,0.9805,0.9853,307
+36,Tomato___Tomato_mosaic_virus,0.9809,0.9847,0.9828,261
+37,Tomato___healthy,0.9826,0.9826,0.9826,288
+-,Macro Average,0.9897,0.9897,0.9897,10807
+-,Weighted Average,0.9898,0.9897,0.9897,10807

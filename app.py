@@ -1,86 +1,152 @@
+import os
+import json
 import streamlit as st
-import tensorflow as tf
+import torch
 import numpy as np
 from PIL import Image
-import os
+from transformers import AutoImageProcessor, AutoModelForImageClassification
 
+# Page Configuration
+st.set_page_config(
+    page_title="AI Crop Disease Detector",
+    page_icon="🌿",
+    layout="wide"
+)
+
+# Hugging Face Model Repository
+HF_MODEL_ID = "RuougiShiki/crop-disease-vit"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, 'model_4_mobilenet_finetuned.keras')
+LOCAL_MODEL_DIR = os.path.join(BASE_DIR, 'best_vit_plant_model')
+LOCAL_WEIGHTS = os.path.join(LOCAL_MODEL_DIR, 'model.safetensors')
+LOCAL_CLASSES = os.path.join(LOCAL_MODEL_DIR, 'classes.json')
 
-CLASS_NAMES = [
-    'Apple___Apple_scab', 'Apple___Black_rot', 'Apple___Cedar_apple_rust', 'Apple___Healthy',
-    'Blueberry___Healthy', 'Cherry_(including_sour)___Powdery_mildew', 'Cherry_(including_sour)___Healthy',
-    'Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot', 'Corn_(maize)___Common_rust_',
-    'Corn_(maize)___Northern_Leaf_Blight', 'Corn_(maize)___Healthy', 'Grape___Black_rot',
-    'Grape___Esca_(Black_Measles)', 'Grape___Leaf_blight_(Isariopsis_Leaf_Spot)', 'Grape___Healthy',
-    'Orange___Haunglongbing_(Citrus_greening)', 'Peach___Bacterial_spot', 'Peach___Healthy',
-    'Pepper,_bell___Bacterial_spot', 'Pepper,_bell___Healthy', 'Potato___Early_blight',
-    'Potato___Late_blight', 'Potato___Healthy', 'Raspberry___Healthy', 'Soybean___Healthy',
-    'Squash___Powdery_mildew', 'Strawberry___Leaf_scorch', 'Strawberry___Healthy',
-    'Tomato___Bacterial_spot', 'Tomato___Early_blight', 'Tomato___Late_blight', 'Tomato___Leaf_Mold',
-    'Tomato___Septoria_leaf_spot', 'Tomato___Spider_mites Two-spotted_spider_mite',
-    'Tomato___Target_Spot', 'Tomato___Tomato_Yellow_Leaf_Curl_Virus', 'Tomato___Tomato_mosaic_virus',
-    'Tomato___Healthy'
-]
+# Cache model and processor for lightning fast inference
 @st.cache_resource
-def load_trained_model():
+def load_vit_pipeline():
     try:
-        if not os.path.exists(MODEL_PATH):
-            st.error(f"❌ File not found: {MODEL_PATH}")
-            return None
-        model = tf.keras.models.load_model(MODEL_PATH)
-        return model
-    except Exception as e:
-        st.error(f"Error loading model: {e}")
-        return None
-
-model = load_trained_model()
-
-st.title("🌿 Plant Disease Detector")
-st.write("Upload a leaf image to detect diseases. (Supported: Apple, Corn, Grape, Tomato, etc.)")
-
-
-st.sidebar.title("ℹ️ Supported Plants & Diseases")
-st.sidebar.markdown("This model recognizes the following **38 classes**:")
-
-with st.sidebar.expander("See Full List of Diseases"):
-    for name in CLASS_NAMES:
-        st.write(f"- {name}")
-
-uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
-
-if uploaded_file is not None:
-    # Display Image
-    image = Image.open(uploaded_file)
-    st.image(image, caption='Uploaded Image', use_container_width=True)
-    
-    if st.button('Analyze Leaf'):
-        if model is not None:
-            with st.spinner('Analyzing...'):
-                try:
-                    img = image.resize((224, 224))
-                    img_array = tf.keras.preprocessing.image.img_to_array(img)
-                    img_array = tf.expand_dims(img_array, 0)
-
-                    predictions = model.predict(img_array)
-                    score = predictions[0] 
-                    
-                    confidence = 100 * np.max(score)
-                    class_idx = np.argmax(score)
-                    predicted_class = CLASS_NAMES[class_idx]
-
-                    CONFIDENCE_THRESHOLD = 70.0
-
-                    if confidence < CONFIDENCE_THRESHOLD:
-                        st.warning("⚠️ **Unknown Image Detected**")
-                        st.write(f"The model is only **{confidence:.2f}%** sure. This might not be a plant leaf from the dataset.")
-                        st.info("Please upload a clear image of a crop leaf (e.g., Apple, Tomato, Corn).")
-                    else:
-                        st.success(f"**Prediction:** {predicted_class}")
-                        st.info(f"**Confidence:** {confidence:.2f}%")
-                        st.progress(int(confidence))
-                
-                except Exception as e:
-                    st.error(f"Error analyzing image: {e}")
+        # Check if full model is present locally (e.g. on your local machine or in Docker)
+        if os.path.exists(LOCAL_WEIGHTS):
+            model_source = LOCAL_MODEL_DIR
+            status_source = "Local weights"
         else:
-            st.error("Model is not loaded.")
+            # Fallback: seamlessly fetch and cache directly from Hugging Face Hub
+            model_source = HF_MODEL_ID
+            status_source = f"Hugging Face Hub ({HF_MODEL_ID})"
+
+        with st.spinner(f"Loading Vision Transformer from {status_source}..."):
+            processor = AutoImageProcessor.from_pretrained(model_source)
+            model = AutoModelForImageClassification.from_pretrained(model_source)
+            model.eval()
+
+        # Load classes from local classes.json or from Hugging Face config id2label
+        if os.path.exists(LOCAL_CLASSES):
+            with open(LOCAL_CLASSES, 'r') as f:
+                classes = json.load(f)
+        else:
+            classes = list(model.config.id2label.values())
+
+        return processor, model, classes
+    except Exception as e:
+        st.error(f"Failed to load Vision Transformer: {e}")
+        return None, None, None
+
+processor, model, class_names = load_vit_pipeline()
+
+def format_label(raw_name: str) -> tuple:
+    """Formats 'Tomato___Early_blight' into ('Tomato', 'Early Blight')."""
+    if "___" in raw_name:
+        plant, disease = raw_name.split("___", 1)
+    else:
+        plant, disease = "Plant", raw_name
+    plant = plant.replace("_", " ").strip()
+    disease = disease.replace("_", " ").strip()
+    if disease.lower() == "healthy":
+        disease = "Healthy (No Disease Detected)"
+    return plant, disease
+
+# Sidebar
+st.sidebar.title("🌿 AI Vision Diagnostics")
+st.sidebar.markdown(
+    """
+    **Architecture:** Vision Transformer (`google/vit-base-patch16-224`)  
+    **Dataset:** PlantVillage + PlantDoc Field Injected  
+    **Validation Accuracy:** **98.97%** (38 Disease Classes)  
+    **Model Hub:** [RuougiShiki/crop-disease-vit](https://huggingface.co/RuougiShiki/crop-disease-vit)
+    """
+)
+
+if class_names:
+    with st.sidebar.expander("Supported Plants & Pathologies"):
+        for name in class_names:
+            p, d = format_label(name)
+            st.write(f"- **{p}:** {d}")
+
+# Main Layout
+st.title("🌾 AI Crop Disease Detection")
+st.markdown(
+    "Upload a crop leaf photograph (in-field or lab shot) to diagnose diseases with high-confidence Vision Transformer predictions."
+)
+
+col1, col2 = st.columns([1, 1], gap="large")
+
+with col1:
+    uploaded_file = st.file_uploader(
+        "Choose a crop leaf image...", 
+        type=["jpg", "jpeg", "png", "webp"]
+    )
+    if uploaded_file is not None:
+        image = Image.open(uploaded_file).convert("RGB")
+        st.image(image, caption="Uploaded Leaf Image", use_container_width=True)
+
+with col2:
+    if uploaded_file is not None:
+        if st.button("🔍 Analyze Leaf Condition", use_container_width=True, type="primary"):
+            if model is None or processor is None:
+                st.error("Model pipeline is unavailable.")
+            else:
+                with st.spinner("Analyzing leaf with Vision Transformer..."):
+                    try:
+                        inputs = processor(images=image, return_tensors="pt")
+                        with torch.no_grad():
+                            outputs = model(**inputs)
+                            logits = outputs.logits
+                            probabilities = torch.nn.functional.softmax(logits, dim=-1)[0]
+
+                        # Top 3 predictions
+                        top3_probs, top3_indices = torch.topk(probabilities, 3)
+                        top_conf = top3_probs[0].item() * 100
+                        top_raw_label = model.config.id2label[top3_indices[0].item()]
+                        plant, disease = format_label(top_raw_label)
+
+                        CONFIDENCE_THRESHOLD = 60.0
+
+                        if top_conf < CONFIDENCE_THRESHOLD:
+                            st.warning("⚠️ **Low Confidence / Unrecognized Sample**")
+                            st.write(
+                                f"Top prediction was **{plant} - {disease}** with only **{top_conf:.2f}%** confidence. "
+                                "This image may not be a supported crop leaf or is obstructed."
+                            )
+                        else:
+                            is_healthy = "healthy" in disease.lower()
+                            if is_healthy:
+                                st.success(f"### ✅ Result: {plant} is Healthy!")
+                            else:
+                                st.error(f"### 🚨 Disease Detected: {disease}")
+                                st.markdown(f"**Crop Specie:** {plant}")
+
+                            st.metric(label="Diagnostic Confidence", value=f"{top_conf:.2f}%")
+                            st.progress(min(int(top_conf), 100))
+
+                        # Detailed Probability Distribution
+                        st.markdown("---")
+                        st.subheader("Diagnostic Probability Distribution")
+                        for prob, idx in zip(top3_probs, top3_indices):
+                            p_crop, p_dis = format_label(model.config.id2label[idx.item()])
+                            pct = prob.item() * 100
+                            st.write(f"**{p_crop} - {p_dis}**: `{pct:.2f}%`")
+                            st.progress(min(int(pct), 100))
+
+                    except Exception as e:
+                        st.error(f"Inference error: {e}")
+    else:
+        st.info("👈 Please upload an image on the left to start the analysis.")

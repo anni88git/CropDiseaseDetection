@@ -1,203 +1,124 @@
-# 🌿 Crop Disease Detection
+# 🌾 Vision Transformer (ViT) for Real-World Crop Disease Detection
 
-A computer-vision application that identifies crop diseases from leaf images using a fine-tuned MobileNet model. The project includes a TensorFlow/Keras training notebook and a Streamlit web interface for uploading plant images and viewing a disease prediction with confidence.
+[![Docker Image](https://img.shields.io/badge/Docker-ryougishikii%2Fcrop__disease__detection-blue?logo=docker)](https://hub.docker.com/repository/docker/ryougishikii/crop_disease_detection/general)
+[![Model Architecture](https://img.shields.io/badge/Model-ViT--Base--Patch16--224-green)](https://huggingface.co/google/vit-base-patch16-224)
+[![Validation Accuracy](https://img.shields.io/badge/Validation%20Accuracy-98.97%25-brightgreen)]()
+[![Classes](https://img.shields.io/badge/Classes-38%20Pathologies-orange)]()
 
-## Project Overview
+An end-to-end computer vision and agricultural pathology diagnostic application powered by a fine-tuned **Google Vision Transformer (`google/vit-base-patch16-224`)**.
 
-This repository was developed to classify crop leaves from the **New Plant Diseases Dataset**. The model recognizes 38 plant-disease classes and returns the most likely class along with its confidence score.
+Unlike standard models trained solely on clean laboratory backgrounds, this model was trained on a combined dataset of **PlantVillage** and in-field real-world leaf photos from **PlantDoc** (incorporating soil, hands, sunlight variations, and complex outdoor foliage).
 
-### Features
+---
 
-- Upload JPEG, PNG, or JPG leaf images.
-- Predict the crop disease class using the saved Keras model.
-- Display prediction confidence and a progress indicator.
-- Show a warning for low-confidence or unrelated images.
-- Include the complete training workflow in a Jupyter notebook.
-- Use a 224 × 224 image input for prediction.
+## 🚀 Key Highlights
 
-### Supported Model
+* **Model Architecture:** Vision Transformer (`ViT-Base-Patch16-224`, 12 Transformer layers, 12 attention heads, 768 hidden dimension).
+* **Robust In-Field Generalization:** Augmented with heavy photometric and geometric variations (Albumentations color jitter, blur, and lighting distortions) to handle actual farm conditions.
+* **Empirical Validation:** **98.97% Validation Accuracy** across **10,807 holdout images** with balanced Macro F1 (0.9897).
+* **Multi-Class Pathology:** Covers **38 distinct classes** spanning Apples, Blueberries, Cherries, Corn, Grapes, Oranges, Peaches, Bell Peppers, Potatoes, Raspberries, Soybeans, Squash, Strawberries, and Tomatoes.
+* **Lightweight & Fast:** Streamlit web application powered by CPU-optimized PyTorch inference. Containerized and ready to deploy anywhere via Docker.
 
-The application loads `model_4_mobilenet_finetuned.keras`, which contains the trained MobileNet-based classifier. The model is expected to be kept in the project root because the Streamlit application resolves its model path relative to `app.py`.
+---
 
-## Dataset
+## 📊 Performance & Validation Metrics
 
-The project uses the [New Plant Diseases Dataset](https://www.kaggle.com/datasets/vipoooool/new-plant-diseases-dataset) from Kaggle.
+| Metric | Score |
+| :--- | :--- |
+| **Validation Accuracy** | **98.97%** |
+| **Macro Average F1** | **0.9897** |
+| **Weighted Average F1** | **0.9898** |
+| **Validation Set Size** | 10,807 images |
+| **Supported Classes** | 38 categories |
 
-The training notebook expects the dataset to be available through Kaggle's input directory in the following structure:
+For detailed per-class precision, recall, and LaTeX tables for academic citations, see [`RESEARCH_PAPER_GUIDE.txt`](./RESEARCH_PAPER_GUIDE.txt).
 
-```text
-/kaggle/input/new-plant-diseases-dataset/
-└── New Plant Diseases Dataset(Augmented)/
-    └── New Plant Diseases Dataset(Augmented)/
-        ├── train/
-        └── valid/
+---
+
+## 🐳 Quickstart with Docker
+
+Pull and run the pre-built container from Docker Hub:
+
+```bash
+docker run -d -p 7860:7860 ryougishikii/crop_disease_detection:latest
 ```
 
-The notebook uses the training directory to create the training and validation datasets and the validation directory for testing.
+Open your browser and navigate to:
+```
+http://localhost:7860
+```
 
-> Note: The application does not need the dataset at runtime. It only requires the trained `.keras` model, which is already included in this repository.
+---
 
-## Tech Stack
+## 💻 Local Installation & Development
 
-- **Frontend:** Streamlit
-- **Deep learning:** TensorFlow and Keras
-- **Data processing:** NumPy and Pillow
-- **Image format:** JPG, JPEG, and PNG
-- **Model:** MobileNet fine-tuned classifier
-- **Dataset:** New Plant Diseases Dataset
+### 1. Clone Repository
+```bash
+git clone https://github.com/ryougishikii/crop_disease_detection.git
+cd crop_disease_detection
+```
 
-## Prerequisites
+### 2. Set Up Virtual Environment & Dependencies
+```bash
+python -m venv venv
+# On Windows:
+.\venv\Scripts\activate
+# On Linux/macOS:
+source venv/bin/activate
 
-- Python 3.10 or later
-- Git
-- A Kaggle account and API token if you plan to retrieve the dataset programmatically
-- A CPU or GPU-compatible TensorFlow installation
+# Install CPU PyTorch and requirements
+pip install -r requirements.txt
+```
 
-The repository includes a TensorFlow CPU dependency, which is suitable for local CPU-based inference and training.
-
-## Installation
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/Ryougi-Shikii/CropDiseaseDetection.git
-   cd CropDiseaseDetection
-   ```
-
-2. Create and activate a virtual environment:
-
-   ```powershell
-   py -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   ```
-
-   On macOS or Linux, use:
-
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   ```
-
-3. Install the project dependencies:
-
-   ```bash
-   python -m pip install --upgrade pip
-   python -m pip install -r requirements.txt
-   ```
-
-4. Install Jupyter Notebook support if you want to run the training notebook:
-
-   ```bash
-   python -m pip install notebook
-   ```
-
-## Run the Application
-
-From the project root, start the Streamlit application:
-
+### 3. Run Streamlit Application
 ```bash
 streamlit run app.py
 ```
 
-Open the URL displayed by Streamlit, usually:
+---
 
-```text
-http://localhost:8501
+## 📁 Repository Structure
+
 ```
-
-The application will automatically load the pretrained model. Select an image, click **Analyze Leaf**, and review the predicted disease and confidence score.
-
-## Training the Model
-
-The complete training workflow is in `Complete Model Training.ipynb`.
-
-### Training prerequisites
-
-- Access to the New Plant Diseases Dataset on Kaggle.
-- A Kaggle notebook or local environment with access to Kaggle datasets.
-- The Kaggle dataset path used by the notebook.
-- TensorFlow and optional Jupyter Notebook dependencies.
-
-### Dataset preparation
-
-The notebook loads:
-
-- Training data from the dataset's `train` directory.
-- Validation data using an internal 20% split from the training directory.
-- Test data from the dataset's `valid` directory.
-
-If you are running locally, place the extracted dataset in a location consistent with the notebook's configured path, or update `DATASET_PATH` and `TEST_DIR_PATH` in the notebook to match your local directory layout.
-
-### Training commands
-
-Open the notebook and run its cells in order:
-
-```bash
-jupyter notebook
-```
-
-Select `Complete Model Training.ipynb`, then run all cells. The notebook trains several model variants and saves the final model as:
-
-```text
-model_4_mobilenet_finetuned.keras
-```
-
-The model file is already included in the repository. To retrain and replace it, run the notebook's final model-saving cell and make sure the resulting file is copied to the project root.
-
-## Model Classes
-
-The application contains 38 class labels. These labels include healthy and diseased examples for crops such as apple, blueberry, cherry, corn, grape, orange, peach, pepper, potato, raspberry, soybean, squash, strawberry, and tomato.
-
-The complete class list is available in the Streamlit sidebar when the application starts.
-
-## Project Structure
-
-```text
 CropDiseaseDetection/
-├── app.py
-├── Complete Model Training.ipynb
-├── model_4_mobilenet_finetuned.keras
-├── requirements.txt
-└── README.md
+├── app.py                         # Streamlit UI & ViT inference engine
+├── best_vit_plant_model/          # Fine-tuned ViT weights, processor, and label map
+│   ├── config.json
+│   ├── model.safetensors
+│   ├── preprocessor_config.json
+│   └── classes.json
+├── dockerfile                     # Multi-stage CPU-optimized Dockerfile
+├── .dockerignore                  # Docker build exclusions
+├── requirements.txt               # Production Python dependencies
+├── RESEARCH_PAPER_GUIDE.txt       # Asset references & metrics for research publication
+└── README.md                      # Documentation
 ```
 
-## Usage Notes
+---
 
-- The model accepts images containing a visible crop leaf.
-- Clear, centered, and well-lit leaves provide the best results.
-- The interface uses a 70% confidence threshold to distinguish a recognized class from an unknown image.
-- Predictions are labels from the training dataset and should not be interpreted as a medical or regulatory diagnosis.
-- The application uses the model's saved class order; class names should remain aligned with the list in `app.py`.
+## 📜 Supported Crop Diseases (38 Classes)
 
-## Troubleshooting
+<details>
+<summary>Click to view all 38 supported plant diseases</summary>
 
-### Model file not found
+* **Apple:** Apple Scab, Black Rot, Cedar Apple Rust, Healthy
+* **Blueberry:** Healthy
+* **Cherry:** Powdery Mildew, Healthy
+* **Corn (Maize):** Cercospora Leaf Spot (Gray Leaf Spot), Common Rust, Northern Leaf Blight, Healthy
+* **Grape:** Black Rot, Esca (Black Measles), Leaf Blight (Isariopsis Leaf Spot), Healthy
+* **Orange:** Huanglongbing (Citrus Greening)
+* **Peach:** Bacterial Spot, Healthy
+* **Pepper (Bell):** Bacterial Spot, Healthy
+* **Potato:** Early Blight, Late Blight, Healthy
+* **Raspberry:** Healthy
+* **Soybean:** Healthy
+* **Squash:** Powdery Mildew
+* **Strawberry:** Leaf Scorch, Healthy
+* **Tomato:** Bacterial Spot, Early Blight, Late Blight, Leaf Mold, Septoria Leaf Spot, Two-Spotted Spider Mite, Target Spot, Tomato Yellow Leaf Curl Virus, Tomato Mosaic Virus, Healthy
 
-Ensure `model_4_mobilenet_finetuned.keras` is in the same directory as `app.py`. If the model was retrained, copy the saved artifact into the project root.
+</details>
 
-### TensorFlow import or GPU error
+---
 
-Verify that the active environment uses the expected Python interpreter and that TensorFlow is installed:
-
-```bash
-python -c "import tensorflow as tf; print(tf.__version__)"
-```
-
-A GPU is optional for inference; CPU execution is supported by the included `tensorflow-cpu` dependency.
-
-### Streamlit cannot start
-
-Validate the installation and run the app from the repository root:
-
-```bash
-python -m pip check
-streamlit run app.py
-```
-
-### Dataset loading errors
-
-The training notebook expects Kaggle's dataset directory. Confirm that the Kaggle dataset is accessible and update the notebook paths if your local dataset layout differs.
-
-## License
-
-See the repository's license file if one is included in the project history or branch. The dataset's Kaggle terms and license must also be reviewed before redistributing or using its contents.
+## 📄 License
+This project is open-source under the MIT License.
