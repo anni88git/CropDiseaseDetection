@@ -1,9 +1,9 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
 fastapi
 uvicorn
-torch>=2.0.0
-transformers>=4.35.0
-pillow>=9.5.0
-numpy>=1.24.0
+torch
+transformers
+pillow
+numpy
 pydantic
 python-multipart
-streamlit>=1.30.0

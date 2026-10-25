@@ -45,26 +45,42 @@ else:
         'Tomato___healthy'
     ]
 
-# Initialize Vision Transformer pipeline
+# Initialize Vision Transformer pipeline (background loaded so server binds port immediately)
 processor = None
 model = None
-torch = None
+model_loading = False
+model_error = None
+torch_module = None
 
-try:
-    import torch
-    from transformers import AutoImageProcessor, AutoModelForImageClassification
-    
-    model_source = LOCAL_MODEL_DIR if os.path.exists(LOCAL_WEIGHTS) else HF_MODEL_ID
-    print(f"[Ksetrin] Initializing Vision Transformer (ViT-Base-Patch16-224) from {model_source}...")
-    t_start = time.time()
-    processor = AutoImageProcessor.from_pretrained(model_source)
-    model = AutoModelForImageClassification.from_pretrained(model_source)
-    model.eval()
-    print(f"[Ksetrin] Vision Transformer ready in {time.time() - t_start:.2f}s (98.97% accuracy)")
-except Exception as e:
-    print(f"[Ksetrin] Vision Transformer will initialize upon environment startup: {e}")
+def load_vit_model():
+    global processor, model, model_loading, model_error, torch_module
+    if model is not None or model_loading:
+        return
+    model_loading = True
+    try:
+        import torch
+        from transformers import AutoImageProcessor, AutoModelForImageClassification
+        torch_module = torch
+
+        model_source = LOCAL_MODEL_DIR if os.path.exists(LOCAL_WEIGHTS) else HF_MODEL_ID
+        print(f"[Ksetrin] Background loading Vision Transformer (ViT-Base-Patch16-224) from {model_source}...")
+        t_start = time.time()
+        processor = AutoImageProcessor.from_pretrained(model_source)
+        model = AutoModelForImageClassification.from_pretrained(model_source)
+        model.eval()
+        print(f"[Ksetrin] Vision Transformer ready in {time.time() - t_start:.2f}s (98.97% accuracy)")
+        model_loading = False
+    except Exception as e:
+        model_error = str(e)
+        model_loading = False
+        print(f"[Ksetrin] Vision Transformer background load notice: {e}")
 
 app = FastAPI(title="Kṣetrin Crop Disease Detection API", version="3.0.0")
+
+@app.on_event("startup")
+async def startup_event():
+    import threading
+    threading.Thread(target=load_vit_model, daemon=True).start()
 
 app.add_middleware(
     CORSMiddleware,
@@ -76,21 +92,31 @@ app.add_middleware(
 
 def run_model_inference(image: Image.Image):
     """Execute Vision Transformer (ViT-Base-Patch16-224) inference."""
+    global model, processor, torch_module, model_loading
+    
     if model is None or processor is None:
-        raise HTTPException(
-            status_code=503, 
-            detail="Vision Transformer is downloading or PyTorch/transformers are not yet installed in local environment."
-        )
+        if model_loading:
+            raise HTTPException(
+                status_code=503,
+                detail="Vision Transformer is currently warming up and downloading model weights. Please retry in 10-15 seconds."
+            )
+        # Attempt immediate load if not already started
+        load_vit_model()
+        if model is None or processor is None:
+            raise HTTPException(
+                status_code=503, 
+                detail="Vision Transformer is initializing or weights are still being cached. Please retry shortly."
+            )
     
     if image.mode != "RGB":
         image = image.convert("RGB")
     
     t0 = time.time()
     inputs = processor(images=image, return_tensors="pt")
-    with torch.no_grad():
+    with torch_module.no_grad():
         outputs = model(**inputs)
         logits = outputs.logits
-        probabilities = torch.nn.functional.softmax(logits, dim=-1)[0]
+        probabilities = torch_module.nn.functional.softmax(logits, dim=-1)[0]
 
     top5_probs, top5_indices = torch.topk(probabilities, 5)
     latency_ms = round((time.time() - t0) * 1000, 1)

@@ -7,9 +7,5 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.10.14
-      - key: TF_ENABLE_ONEDNN_OPTS
-        value: 0
-      - key: TF_CPP_MIN_LOG_LEVEL
-        value: 2
       - key: GROQ_API_KEY
         sync: false
