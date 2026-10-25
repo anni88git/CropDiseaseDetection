@@ -6,7 +6,7 @@
   <meta name="description" content="Ksetrin – Mobile Crop Disease Intelligence Platform powered by MobileNetV2." />
   <title>Ksetrin | Crop Intelligence</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Serif+Devanagari:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -303,18 +303,95 @@
     }
     .chat-send-btn svg { width: 18px; height: 18px; stroke: #fff; }
 
-    /* Crops Catalog Grid */
+    /* Crops Catalog Grid & Interactive Items */
     .search-box {
       width: 100%; padding: 11px 14px; border-radius: var(--radius-md);
-      border: 1px solid var(--border); font-size: 13px; outline: none; font-family: inherit; margin-bottom: 14px;
+      border: 1px solid var(--border); font-size: 13px; outline: none; font-family: inherit; margin-bottom: 12px;
+      background: #ffffff;
     }
+    .filter-chips-row {
+      display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px;
+    }
+    .filter-chip {
+      padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 600;
+      background: var(--accent-soft); border: 1px solid var(--border); color: var(--text-muted);
+      cursor: pointer; white-space: nowrap; transition: var(--transition);
+    }
+    .filter-chip.active {
+      background: var(--primary); color: #ffffff; border-color: var(--primary);
+    }
+
     .crops-list { display: flex; flex-direction: column; gap: 8px; }
     .crop-item {
-      background: #fff; border: 1px solid var(--border); border-radius: var(--radius-md);
+      background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md);
       padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; transition: var(--transition); box-shadow: var(--shadow-sm);
     }
-    .crop-item-name { font-size: 13px; font-weight: 700; color: var(--text-main); }
-    .crop-item-cond { font-size: 12px; color: var(--text-muted); }
+    .crop-item:hover, .crop-item:active {
+      border-color: var(--accent); background: #fbfdfb; transform: translateY(-1px);
+    }
+    .crop-item-name { font-size: 14px; font-weight: 700; color: var(--text-main); }
+    .crop-item-cond { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .crop-item-pathogen { font-size: 11px; color: var(--accent); font-style: italic; margin-top: 2px; }
+
+    /* AI Chat Context Banner */
+    .chat-context-card {
+      background: linear-gradient(135deg, #eef7f1, #e1efe5);
+      border: 1.5px solid #a8d5b4; border-radius: var(--radius-md);
+      padding: 12px 14px; margin-bottom: 14px; box-shadow: var(--shadow-sm);
+    }
+    .context-tag-row {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;
+    }
+    .context-tag {
+      font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--primary);
+    }
+    .context-badge {
+      font-size: 11px; font-weight: 700; background: #ffffff; padding: 2px 8px;
+      border-radius: 999px; color: var(--accent); border: 1px solid #b7dcbf;
+    }
+    .context-leaf-name { font-size: 15px; font-weight: 800; color: var(--text-main); }
+    .context-leaf-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .prompt-chips-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .prompt-chip {
+      font-size: 11px; font-weight: 600; padding: 5px 11px; border-radius: 999px;
+      background: #ffffff; border: 1px solid #b7dcbf; color: var(--primary);
+      cursor: pointer; transition: var(--transition);
+    }
+    .prompt-chip:active { background: var(--accent-soft); }
+
+    /* Pathology Detail Modal / Bottom Sheet */
+    .pathology-modal-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(10, 25, 16, 0.72);
+      backdrop-filter: blur(8px);
+      display: flex; align-items: flex-end; justify-content: center;
+    }
+    .pathology-modal-sheet {
+      width: 100%; max-width: 560px; max-height: 85vh; overflow-y: auto;
+      background: #ffffff; border-radius: 26px 26px 0 0;
+      padding: 24px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+      box-shadow: 0 -12px 40px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    .pm-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .pm-crop-badge {
+      display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.6px; padding: 3px 10px; border-radius: 999px; background: var(--accent-soft);
+      color: var(--primary); border: 1px solid var(--border); margin-bottom: 6px;
+    }
+    .pm-title { font-size: 19px; font-weight: 800; color: var(--text-main); line-height: 1.2; }
+    .pm-pathogen { font-size: 13px; color: var(--accent); font-weight: 600; margin-top: 3px; }
+    .pm-close-btn {
+      width: 32px; height: 32px; border-radius: 50%; background: var(--accent-soft);
+      border: 1px solid var(--border); font-size: 20px; line-height: 1; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; color: var(--text-muted);
+    }
+    .pm-desc { font-size: 13px; line-height: 1.5; color: var(--text-muted); margin-bottom: 14px; }
+    .pm-block { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .pm-block-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--primary); margin-bottom: 6px; }
+    .pm-list { padding-left: 20px; font-size: 13px; line-height: 1.5; color: var(--text-main); margin: 0; }
+    .pm-list li { margin-bottom: 4px; }
 
     /* Onboarding Modal */
     .onboard-overlay {
@@ -542,6 +619,17 @@
           <p style="font-size:12px; color:var(--text-muted);">Real-time agronomic consultation powered by Groq neural intelligence.</p>
         </div>
 
+        <!-- Active Leaf Context Banner -->
+        <div id="chat-leaf-context-card" class="chat-context-card" style="display:none;">
+          <div class="context-tag-row">
+            <span class="context-tag">Active Leaf Under Investigation</span>
+            <span id="chat-leaf-badge" class="context-badge">Connected</span>
+          </div>
+          <div id="chat-leaf-title" class="context-leaf-name"></div>
+          <div id="chat-leaf-details" class="context-leaf-sub"></div>
+          <div class="prompt-chips-row" id="chat-quick-prompts"></div>
+        </div>
+
         <div class="chat-container">
           <div class="chat-messages" id="chat-messages">
             <div class="chat-msg bot">
@@ -564,7 +652,14 @@
           <p style="font-size:12px; color:var(--text-muted);">Comprehensive plant health conditions & field pathology directory.</p>
         </div>
 
-        <input type="text" class="search-box" id="crops-search" placeholder="Search crops or diseases..." oninput="filterCropsList(this.value)" />
+        <!-- Category Filter Chips -->
+        <div class="filter-chips-row">
+          <button type="button" class="filter-chip active" id="chip-all" onclick="filterCropsByType('all')">All (38)</button>
+          <button type="button" class="filter-chip" id="chip-diseases" onclick="filterCropsByType('diseases')">Diseases (26)</button>
+          <button type="button" class="filter-chip" id="chip-healthy" onclick="filterCropsByType('healthy')">Healthy (12)</button>
+        </div>
+
+        <input type="text" class="search-box" id="crops-search" placeholder="Search crops, conditions, pathogens..." oninput="filterCropsList(this.value)" />
 
         <div class="crops-list" id="crops-list">
           <div style="font-size:12px; color:var(--text-muted); padding:10px;">Loading directory...</div>
@@ -593,9 +688,9 @@
         <div class="card">
           <div class="card-title">System Status</div>
           <div style="font-size:13px; line-height:1.6; color:var(--text-muted);">
-            • Model: MobileNetV2 Fine-Tuned<br />
-            • Coverage: Universal Multi-Crop Pathology<br />
-            • Engine: TensorFlow CPU + Groq Neural LLM<br />
+            • Model: Vision Transformer (ViT-Base-Patch16-224 · 98.97% Accuracy)<br />
+            • Coverage: Universal Multi-Crop Pathology (38 Classes)<br />
+            • Engine: PyTorch CPU + Groq Neural LLM<br />
             • Host: Localhost:8080
           </div>
           <button class="btn-outline" style="margin-top:16px; color:var(--danger); border-color:#fca5a5;" onclick="signOut()">
@@ -603,6 +698,46 @@
           </button>
         </div>
       </section>
+
+      <!-- Interactive Pathology Detail Modal -->
+      <div id="pathology-modal" class="pathology-modal-overlay" style="display:none;" onclick="if(event.target===this) closePathologyModal()">
+        <div class="pathology-modal-sheet">
+          <div class="pm-header">
+            <div>
+              <span id="pm-crop-badge" class="pm-crop-badge"></span>
+              <div id="pm-title" class="pm-title"></div>
+              <div id="pm-pathogen" class="pm-pathogen"></div>
+            </div>
+            <button type="button" class="pm-close-btn" onclick="closePathologyModal()">&times;</button>
+          </div>
+
+          <div id="pm-desc" class="pm-desc"></div>
+
+          <div class="pm-block">
+            <div class="pm-block-title">Observed Clinical Symptoms</div>
+            <ul id="pm-symptoms" class="pm-list"></ul>
+          </div>
+
+          <div class="pm-block">
+            <div class="pm-block-title">Certified Organic Treatment</div>
+            <ul id="pm-organic" class="pm-list"></ul>
+          </div>
+
+          <div class="pm-block">
+            <div class="pm-block-title">Chemical Protection Options</div>
+            <ul id="pm-chemical" class="pm-list"></ul>
+          </div>
+
+          <div class="pm-block">
+            <div class="pm-block-title">Field Prevention Guidelines</div>
+            <ul id="pm-prevention" class="pm-list"></ul>
+          </div>
+
+          <button type="button" class="btn-action" style="margin-top:18px;" onclick="consultAIFromPathology()">
+            <span>Consult AI Agronomist on this Condition →</span>
+          </button>
+        </div>
+      </div>
 
     </main>
 
@@ -785,13 +920,38 @@
     function handleFileSelect(e) {
       const files = e.target.files;
       if (files && files.length > 0) {
-        currentFile = files[0];
+        const file = files[0];
         currentSample = null;
+        
+        // Fast canvas downscale so mobile camera photos (12-48MP) upload in milliseconds
         const reader = new FileReader();
-        reader.onload = (evt) => {
-          showPreview(evt.target.result);
+        reader.onload = function(evt) {
+          const img = new Image();
+          img.onload = function() {
+            const maxDim = 512;
+            let w = img.width, h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) {
+                h = Math.round((h * maxDim) / w);
+                w = maxDim;
+              } else {
+                w = Math.round((w * maxDim) / h);
+                h = maxDim;
+              }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            
+            canvas.toBlob(function(blob) {
+              currentFile = new File([blob], file.name || 'leaf.jpg', { type: 'image/jpeg' });
+              showPreview(canvas.toDataURL('image/jpeg', 0.88));
+            }, 'image/jpeg', 0.88);
+          };
+          img.src = evt.target.result;
         };
-        reader.readAsDataURL(files[0]);
+        reader.readAsDataURL(file);
       }
     }
 
@@ -892,19 +1052,47 @@
       document.getElementById('remedy-chemical').textContent = (d.chemical_treatment || []).join('; ') || 'No chemical treatment needed.';
       document.getElementById('remedy-prevention').textContent = (d.prevention || []).join('; ') || 'Standard crop monitoring.';
 
+      // Synchronize with AI Chat active leaf context
+      updateChatLeafContext(d);
+
       // Scroll into view smoothly
       sheet.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    function askAIAssistantAboutResult() {
-      if (!currentDiagnosis) return;
-      switchNavTab('chat');
+    function updateChatLeafContext(d) {
+      const card = document.getElementById('chat-leaf-context-card');
+      if (!card || !d) return;
+      card.style.display = 'block';
+
+      document.getElementById('chat-leaf-title').textContent = `${d.crop} · ${d.condition}`;
+      document.getElementById('chat-leaf-badge').textContent = `${d.confidence}% Confidence`;
+      document.getElementById('chat-leaf-details').textContent = `Severity: ${d.severity || (d.is_healthy ? 'Normal' : 'High')} · Pathogen: ${d.pathogen || 'N/A'}`;
+
+      const promptsBox = document.getElementById('chat-quick-prompts');
+      promptsBox.innerHTML = `
+        <button type="button" class="prompt-chip" onclick="askQuickPrompt('What are the best organic treatments for this leaf?')">Organic Remedy</button>
+        <button type="button" class="prompt-chip" onclick="askQuickPrompt('What chemical sprays or fungicides are certified for this condition?')">Chemical Spray</button>
+        <button type="button" class="prompt-chip" onclick="askQuickPrompt('How do I prevent this pathogen from spreading to other plants?')">Field Prevention</button>
+        <button type="button" class="prompt-chip" onclick="askQuickPrompt('What are the key symptoms to look out for next?')">Symptoms</button>
+      `;
+    }
+
+    function askQuickPrompt(text) {
       const input = document.getElementById('chat-user-input');
-      input.value = `I just diagnosed ${currentDiagnosis.crop} with ${currentDiagnosis.condition}. What specific steps should I take next?`;
+      input.value = text;
       sendChatMessage();
     }
 
-    // AI Chat System
+    function askAIAssistantAboutResult() {
+      if (!currentDiagnosis) return;
+      updateChatLeafContext(currentDiagnosis);
+      switchNavTab('chat');
+      const input = document.getElementById('chat-user-input');
+      input.value = `I just diagnosed ${currentDiagnosis.crop} with ${currentDiagnosis.condition} (${currentDiagnosis.confidence}% confidence). What specific steps and treatments should I prioritize?`;
+      sendChatMessage();
+    }
+
+    // AI Chat System with Full Leaf Context Personalization
     async function sendChatMessage() {
       const input = document.getElementById('chat-user-input');
       const msg = input.value.trim();
@@ -923,18 +1111,32 @@
         } catch(e){}
       }
 
-      const botMsgId = appendChatMessage('bot', 'Analyzing question...');
+      const botMsgId = appendChatMessage('bot', 'Consulting AI Agronomist...');
 
       try {
+        const payload = {
+          message: msg,
+          user_name: userName,
+          user_purpose: userPurpose,
+          context: currentDiagnosis ? `${currentDiagnosis.crop} - ${currentDiagnosis.condition}` : null,
+          diagnosis: currentDiagnosis ? {
+            crop: currentDiagnosis.crop,
+            condition: currentDiagnosis.condition,
+            confidence: currentDiagnosis.confidence,
+            severity: currentDiagnosis.severity,
+            pathogen: currentDiagnosis.pathogen,
+            description: currentDiagnosis.description,
+            symptoms: currentDiagnosis.symptoms,
+            organic_treatment: currentDiagnosis.organic_treatment,
+            chemical_treatment: currentDiagnosis.chemical_treatment,
+            prevention: currentDiagnosis.prevention
+          } : null
+        };
+
         const res = await fetch(API_BASE + '/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: msg,
-            user_name: userName,
-            user_purpose: userPurpose,
-            context: currentDiagnosis ? `${currentDiagnosis.crop} - ${currentDiagnosis.condition}` : null
-          })
+          body: JSON.stringify(payload)
         });
         const data = await res.json();
         const replyText = data.success ? data.reply : 'Unable to retrieve answer from AI service.';
@@ -982,7 +1184,12 @@
           body: JSON.stringify({
             message: q,
             user_name: userName,
-            user_purpose: userPurpose
+            user_purpose: userPurpose,
+            diagnosis: currentDiagnosis ? {
+              crop: currentDiagnosis.crop,
+              condition: currentDiagnosis.condition,
+              confidence: currentDiagnosis.confidence
+            } : null
           })
         });
         const data = await res.json();
@@ -992,38 +1199,128 @@
       }
     }
 
-    // Crops Catalog
+    // Comprehensive Pathology Directory
+    let currentCropsFilter = 'all';
+    let selectedModalCrop = null;
+
     async function loadCrops() {
       try {
         const res = await fetch(API_BASE + '/api/classes');
         const data = await res.json();
         allCrops = data.classes || [];
         renderCropsList(allCrops);
-      } catch (err) {}
+      } catch (err) {
+        document.getElementById('crops-list').innerHTML = '<div style="font-size:12px; color:var(--danger); padding:10px;">Error loading pathology directory.</div>';
+      }
     }
 
     function renderCropsList(list) {
       const container = document.getElementById('crops-list');
       if (!container) return;
-      container.innerHTML = list.map(c => `
-        <div class="crop-item">
-          <div>
+      if (!list || list.length === 0) {
+        container.innerHTML = '<div style="font-size:13px; color:var(--text-muted); padding:14px; text-align:center;">No conditions found matching your search.</div>';
+        return;
+      }
+
+      container.innerHTML = list.map((c, idx) => `
+        <div class="crop-item" onclick="openPathologyModalByIndex(${allCrops.indexOf(c)})">
+          <div style="flex:1;">
             <div class="crop-item-name">${c.crop}</div>
             <div class="crop-item-cond">${c.condition}</div>
+            ${c.pathogen && c.pathogen !== 'N/A' ? `<div class="crop-item-pathogen">${c.pathogen}</div>` : ''}
           </div>
-          <span style="font-size:11px; font-weight:700; color:${c.is_healthy ? 'var(--accent)' : 'var(--danger)'};">
-            ${c.is_healthy ? 'Healthy' : 'Disease'}
-          </span>
+          <div style="text-align:right;">
+            <span style="font-size:11px; font-weight:700; padding:3px 8px; border-radius:999px; background:${c.is_healthy ? 'var(--accent-soft)' : 'var(--danger-bg)'}; color:${c.is_healthy ? 'var(--accent)' : 'var(--danger)'};">
+              ${c.is_healthy ? 'Healthy' : (c.severity || 'Disease')}
+            </span>
+            <div style="font-size:10px; color:var(--text-light); margin-top:4px;">Tap details →</div>
+          </div>
         </div>
       `).join('');
     }
 
+    function filterCropsByType(type) {
+      currentCropsFilter = type;
+      ['all', 'diseases', 'healthy'].forEach(t => {
+        const el = document.getElementById('chip-' + t);
+        if (el) el.classList.toggle('active', t === type);
+      });
+      applyCombinedCropsFilter();
+    }
+
     function filterCropsList(query) {
-      const q = query.toLowerCase().trim();
-      const filtered = allCrops.filter(c =>
-        c.crop.toLowerCase().includes(q) || c.condition.toLowerCase().includes(q)
-      );
+      applyCombinedCropsFilter();
+    }
+
+    function applyCombinedCropsFilter() {
+      const q = (document.getElementById('crops-search')?.value || '').toLowerCase().trim();
+      let filtered = allCrops;
+
+      if (currentCropsFilter === 'diseases') {
+        filtered = filtered.filter(c => !c.is_healthy);
+      } else if (currentCropsFilter === 'healthy') {
+        filtered = filtered.filter(c => c.is_healthy);
+      }
+
+      if (q) {
+        filtered = filtered.filter(c =>
+          (c.crop && c.crop.toLowerCase().includes(q)) ||
+          (c.condition && c.condition.toLowerCase().includes(q)) ||
+          (c.pathogen && c.pathogen.toLowerCase().includes(q)) ||
+          (c.description && c.description.toLowerCase().includes(q))
+        );
+      }
+
       renderCropsList(filtered);
+    }
+
+    function openPathologyModalByIndex(idx) {
+      const c = allCrops[idx];
+      if (!c) return;
+      selectedModalCrop = c;
+
+      document.getElementById('pm-crop-badge').textContent = c.crop;
+      document.getElementById('pm-title').textContent = c.condition;
+      document.getElementById('pm-pathogen').textContent = c.pathogen && c.pathogen !== 'N/A' ? `Pathogen: ${c.pathogen}` : (c.is_healthy ? 'Certified Healthy Botanical Profile' : 'General Field Pathology');
+      document.getElementById('pm-desc').textContent = c.description || 'Comprehensive clinical observations for this crop condition.';
+
+      const formatList = (items, emptyText) => {
+        if (!items || items.length === 0) return `<li>${emptyText}</li>`;
+        return items.map(item => `<li>${item}</li>`).join('');
+      };
+
+      document.getElementById('pm-symptoms').innerHTML = formatList(c.symptoms, 'No symptoms documented for healthy foliage.');
+      document.getElementById('pm-organic').innerHTML = formatList(c.organic_treatment, 'No organic treatment needed.');
+      document.getElementById('pm-chemical').innerHTML = formatList(c.chemical_treatment, 'No chemical intervention required.');
+      document.getElementById('pm-prevention').innerHTML = formatList(c.prevention, 'Standard botanical and crop care monitoring.');
+
+      document.getElementById('pathology-modal').style.display = 'flex';
+    }
+
+    function closePathologyModal() {
+      document.getElementById('pathology-modal').style.display = 'none';
+    }
+
+    function consultAIFromPathology() {
+      if (!selectedModalCrop) return;
+      currentDiagnosis = {
+        crop: selectedModalCrop.crop,
+        condition: selectedModalCrop.condition,
+        confidence: 100,
+        severity: selectedModalCrop.severity,
+        pathogen: selectedModalCrop.pathogen,
+        description: selectedModalCrop.description,
+        symptoms: selectedModalCrop.symptoms,
+        organic_treatment: selectedModalCrop.organic_treatment,
+        chemical_treatment: selectedModalCrop.chemical_treatment,
+        prevention: selectedModalCrop.prevention
+      };
+      updateChatLeafContext(currentDiagnosis);
+      closePathologyModal();
+      switchNavTab('chat');
+      const input = document.getElementById('chat-user-input');
+      input.value = `I am reviewing ${selectedModalCrop.crop} - ${selectedModalCrop.condition}. What are the most effective management steps?`;
+      sendChatMessage();
     }
 
     function signOut() {

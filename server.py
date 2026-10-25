@@ -61,6 +61,7 @@ def load_vit_model():
         import torch
         from transformers import AutoImageProcessor, AutoModelForImageClassification
         torch_module = torch
+        torch_module.set_num_threads(min(4, os.cpu_count() or 4))
 
         model_source = LOCAL_MODEL_DIR if os.path.exists(LOCAL_WEIGHTS) else HF_MODEL_ID
         print(f"[Ksetrin] Background loading Vision Transformer (ViT-Base-Patch16-224) from {model_source}...")
@@ -68,14 +69,23 @@ def load_vit_model():
         processor = AutoImageProcessor.from_pretrained(model_source)
         model = AutoModelForImageClassification.from_pretrained(model_source)
         model.eval()
-        print(f"[Ksetrin] Vision Transformer ready in {time.time() - t_start:.2f}s (98.97% accuracy)")
+
+        # Warm-up pass to eliminate cold-start latency on subsequent requests
+        try:
+            with torch_module.inference_mode():
+                dummy_input = torch_module.zeros((1, 3, 224, 224))
+                _ = model(dummy_input)
+        except Exception:
+            pass
+
+        print(f"[Ksetrin] Vision Transformer ready in {time.time() - t_start:.2f}s (98.97% accuracy, warmed up)")
         model_loading = False
     except Exception as e:
         model_error = str(e)
         model_loading = False
         print(f"[Ksetrin] Vision Transformer background load notice: {e}")
 
-app = FastAPI(title="Kṣetrin Crop Disease Detection API", version="3.0.0")
+app = FastAPI(title="Ksetrin Crop Disease Detection API", version="3.0.0")
 
 @app.on_event("startup")
 async def startup_event():
@@ -91,7 +101,7 @@ app.add_middleware(
 )
 
 def run_model_inference(image: Image.Image):
-    """Execute Vision Transformer (ViT-Base-Patch16-224) inference."""
+    """Execute Vision Transformer (ViT-Base-Patch16-224) inference with high performance."""
     global model, processor, torch_module, model_loading
     
     if model is None or processor is None:
@@ -112,9 +122,14 @@ def run_model_inference(image: Image.Image):
     if image.mode != "RGB":
         image = image.convert("RGB")
     
+    # Fast bilinear thumbnail if image is very large (e.g. 12-48MP camera uploads)
+    # The ViT processor accepts 224x224, so pre-scaling avoids massive PIL bicubic interpolation time
+    if image.width > 384 or image.height > 384:
+        image.thumbnail((384, 384), Image.Resampling.BILINEAR)
+
     t0 = time.time()
     inputs = processor(images=image, return_tensors="pt")
-    with torch_module.no_grad():
+    with torch_module.inference_mode():
         outputs = model(**inputs)
         logits = outputs.logits
         probabilities = torch_module.nn.functional.softmax(logits, dim=-1)[0]
@@ -228,7 +243,7 @@ async def get_samples():
 
 @app.get("/api/classes")
 async def get_classes():
-    """Return list of all 38 recognized crop disease classes."""
+    """Return list of all 38 recognized crop disease classes with complete agronomic profiles."""
     classes_list = []
     for cls in CLASS_NAMES:
         info = get_disease_info(cls)
@@ -236,7 +251,14 @@ async def get_classes():
             "id": cls,
             "crop": info['crop'],
             "condition": info['condition'],
-            "is_healthy": info['is_healthy']
+            "is_healthy": info['is_healthy'],
+            "severity": info.get('severity', 'Standard'),
+            "pathogen": info.get('pathogen', 'N/A'),
+            "description": info.get('description', ''),
+            "symptoms": info.get('symptoms', []),
+            "organic_treatment": info.get('organic_treatment', []),
+            "chemical_treatment": info.get('chemical_treatment', []),
+            "prevention": info.get('prevention', [])
         })
     return {"classes": classes_list, "total": len(classes_list)}
 
@@ -249,7 +271,7 @@ async def health_check():
         "model_architecture": "Vision Transformer (ViT-Base-Patch16-224)",
         "model_accuracy": "98.97%",
         "classes_count": len(CLASS_NAMES),
-        "platform": "Kṣetrin Smart Agriculture Studio"
+        "platform": "Ksetrin Smart Agriculture Studio"
     }
 
 class AuthRequest(BaseModel):
@@ -262,6 +284,7 @@ class ChatRequest(BaseModel):
     user_name: Optional[str] = "Farmer"
     user_purpose: Optional[str] = "Detection"
     context: Optional[str] = None
+    diagnosis: Optional[dict] = None
 
 def _get_groq_key():
     key = os.environ.get("GROQ_API_KEY")
@@ -282,7 +305,7 @@ GROQ_API_KEY = _get_groq_key()
 
 @app.post("/api/chat")
 async def chat_with_bot(req: ChatRequest):
-    """Chat endpoint powered by Groq LLM API."""
+    """Chat endpoint powered by Groq LLM API with active leaf personalization."""
     import urllib.request
     import json
     
@@ -292,7 +315,35 @@ async def chat_with_bot(req: ChatRequest):
         "Provide direct, concise, and scientifically accurate agricultural advice. "
         "Do not use emojis in your response. Keep answers concise, factual, and helpful."
     )
-    if req.context:
+
+    if req.diagnosis:
+        d = req.diagnosis
+        crop = d.get('crop', '')
+        cond = d.get('condition', '')
+        conf = d.get('confidence', '')
+        sev = d.get('severity', '')
+        pathogen = d.get('pathogen', '')
+        desc = d.get('description', '')
+        org = d.get('organic_treatment', [])
+        chem = d.get('chemical_treatment', [])
+        prev = d.get('prevention', [])
+        sym = d.get('symptoms', [])
+
+        system_prompt += (
+            f"\n\nCURRENT LEAF UNDER ACTIVE INVESTIGATION:\n"
+            f"- Crop: {crop}\n"
+            f"- Condition: {cond} (Confidence: {conf}%)\n"
+            f"- Severity: {sev}\n"
+            f"- Pathogen: {pathogen}\n"
+            f"- Clinical Description: {desc}\n"
+            f"- Symptoms: {'; '.join(sym) if isinstance(sym, list) else sym}\n"
+            f"- Certified Organic Treatment: {'; '.join(org) if isinstance(org, list) else org}\n"
+            f"- Chemical Treatment: {'; '.join(chem) if isinstance(chem, list) else chem}\n"
+            f"- Field Prevention: {'; '.join(prev) if isinstance(prev, list) else prev}\n"
+            f"\nThe user is specifically asking questions regarding THIS active leaf diagnosis. "
+            f"Tailor all agronomic advice, dosages, timing, and explanations directly to this leaf."
+        )
+    elif req.context:
         system_prompt += f" Current leaf diagnosis context: {req.context}."
 
     payload = {

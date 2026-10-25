@@ -1,5 +1,5 @@
 """
-Kṣetrin - Agronomic Knowledge Base
+Ksetrin - Agronomic Knowledge Base
 Detailed symptoms, remedies, treatments, and prevention guidelines for all 38 classes.
 """
 
