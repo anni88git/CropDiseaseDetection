@@ -1,4 +1,7 @@
-streamlit
+fastapi
+uvicorn
 tensorflow-cpu
 numpy
 pillow
+pydantic
+python-multipart

@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="Ksetrin – Mobile Crop Disease Intelligence Platform powered by MobileNetV2." />
+  <title>Ksetrin | Crop Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Serif+Devanagari:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-surface: #f2f6f3;
+      --card-bg:    #ffffff;
+      --primary:    #1f4d34;
+      --primary-hover: #163a27;
+      --primary-light: #e4efe7;
+      --accent:     #2e7d52;
+      --accent-soft:#edf5f0;
+      --border:     #d7e3da;
+      --text-main:  #14241a;
+      --text-muted: #587060;
+      --text-light: #839b8b;
+      --danger:     #b91c1c;
+      --danger-bg:  #fef2f2;
+      --success:    #15803d;
+      --success-bg: #f0fdf4;
+      --warning:    #b45309;
+      --warning-bg: #fffbeb;
+      --radius-sm:  8px;
+      --radius-md:  14px;
+      --radius-lg:  20px;
+      --radius-xl:  26px;
+      --shadow-sm:  0 2px 8px rgba(20,40,25,0.04);
+      --shadow-md:  0 8px 24px rgba(20,40,25,0.06);
+      --shadow-lg:  0 16px 40px rgba(20,40,25,0.09);
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f0f4f1;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Mobile Container Frame */
+    .app-frame {
+      width: 100%;
+      max-width: 560px;
+      min-height: 100vh;
+      background: #ffffff;
+      box-shadow: 0 0 50px rgba(20, 45, 28, 0.08);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Top App Bar */
+    .top-bar {
+      position: sticky; top: 0; z-index: 40;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 18px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand-group {
+      display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit;
+    }
+    .brand-icon {
+      width: 34px; height: 34px; border-radius: var(--radius-sm);
+      background: var(--primary); display: flex; align-items: center; justify-content: center;
+      color: #fff; flex-shrink: 0;
+    }
+    .brand-icon svg { width: 20px; height: 20px; stroke: #fff; }
+    .brand-title { font-size: 19px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.1; }
+    .brand-sub { font-size: 10px; font-weight: 600; color: var(--accent); letter-spacing: 0.6px; text-transform: uppercase; }
+
+    .top-meta { display: flex; align-items: center; gap: 8px; }
+    .user-pill {
+      background: var(--accent-soft); border: 1px solid var(--border);
+      padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600;
+      color: var(--primary); display: flex; align-items: center; gap: 5px; cursor: pointer;
+    }
+    .online-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+    /* Content Area */
+    .app-content {
+      flex: 1; padding: 18px 18px 96px;
+    }
+
+    /* Bottom Navigation Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 560px;
+      z-index: 50;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 9px 8px 14px;
+    }
+    .nav-tab-btn {
+      flex: 1;
+      min-width: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: var(--text-light);
+      transition: var(--transition);
+      padding: 4px 2px;
+    }
+    .nav-tab-btn svg { width: 22px; height: 22px; stroke: currentColor; transition: var(--transition); }
+    .nav-tab-btn span { font-size: 11px; font-weight: 600; }
+    .nav-tab-btn.active { color: var(--primary); }
+    .nav-tab-btn.active svg { stroke: var(--primary); transform: translateY(-1px); }
+
+    /* View Sections */
+    .tab-view { display: none; }
+    .tab-view.active { display: block; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Cards & Components */
+    .card {
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 18px; margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+    .card-title {
+      font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 6px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-subtitle { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+
+    /* User Welcome Header */
+    .hero-greeting { margin-bottom: 18px; }
+    .greeting-name { font-size: 24px; font-weight: 800; letter-spacing: -0.4px; color: var(--primary); }
+    .greeting-role-badge {
+      display: inline-block; margin-top: 6px; padding: 4px 10px; border-radius: 999px;
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+      background: var(--primary-light); color: var(--primary);
+    }
+
+    /* Purpose Advisory Banner */
+    .purpose-banner {
+      background: var(--accent-soft); border-left: 3px solid var(--accent);
+      padding: 12px 14px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin-bottom: 16px; font-size: 13px; color: var(--text-main); line-height: 1.5;
+    }
+
+    /* Primary Action Button */
+    .btn-action {
+      width: 100%; padding: 13px; border-radius: var(--radius-md);
+      background: var(--primary); color: #fff; font-size: 14px; font-weight: 600;
+      border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      gap: 8px; transition: var(--transition); text-decoration: none;
+    }
+    .btn-action:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-action:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-outline {
+      width: 100%; padding: 11px; border-radius: var(--radius-md);
+      background: #fff; color: var(--text-main); font-size: 13px; font-weight: 600;
+      border: 1px solid var(--border); cursor: pointer; display: flex; align-items: center; justify-content: center;
+      gap: 6px; transition: var(--transition);
+    }
+    .btn-outline:hover { background: var(--accent-soft); border-color: var(--accent); }
+
+    /* Scan / Upload Box */
+    .scan-dropzone {
+      border: 1.5px dashed var(--accent); border-radius: var(--radius-lg);
+      background: var(--accent-soft); padding: 32px 18px; text-align: center;
+      cursor: pointer; transition: var(--transition); margin-bottom: 14px;
+    }
+    .scan-dropzone:hover { background: #e3ede6; }
+    .scan-icon-wrap {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: #fff; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .scan-icon-wrap svg { width: 22px; height: 22px; stroke: var(--primary); }
+    .scan-title { font-size: 14px; font-weight: 700; color: var(--text-main); }
+    .scan-hint { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* 1-Click Samples Row */
+    .samples-scroll {
+      display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none;
+    }
+    .samples-scroll::-webkit-scrollbar { display: none; }
+    .sample-pill {
+      flex: 0 0 auto; background: #fff; border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 8px 12px; display: flex; align-items: center; gap: 8px;
+      cursor: pointer; transition: var(--transition);
+    }
+    .sample-pill:hover { border-color: var(--accent); background: var(--accent-soft); }
+    .sample-pill img { width: 34px; height: 34px; border-radius: 6px; object-fit: cover; }
+    .sample-pill-text { text-align: left; }
+    .sample-pill-name { font-size: 12px; font-weight: 600; color: var(--text-main); }
+    .sample-pill-sub { font-size: 10px; color: var(--accent); font-weight: 500; }
+
+    /* Preview Container with Scanner Laser */
+    .preview-stage {
+      position: relative; border-radius: var(--radius-lg); overflow: hidden;
+      background: #111; margin-bottom: 14px; display: none;
+    }
+    .preview-img { width: 100%; max-height: 280px; object-fit: contain; display: block; }
+    .scanner-laser {
+      position: absolute; left: 0; right: 0; height: 2px;
+      background: #4ade80; box-shadow: 0 0 10px #4ade80, 0 0 16px #22c55e;
+      top: 0; display: none; z-index: 5;
+    }
+    .scanner-laser.active {
+      display: block; animation: sweep 1.5s ease-in-out infinite alternate;
+    }
+    @keyframes sweep {
+      0% { top: 0%; opacity: 0.6; }
+      100% { top: 96%; opacity: 1; }
+    }
+
+    /* Bottom Sheet / Result Card */
+    .diag-sheet {
+      border-radius: var(--radius-lg); padding: 18px; margin-top: 14px;
+      border: 1px solid var(--border); display: none;
+    }
+    .diag-sheet.healthy { background: var(--success-bg); border-color: #86efac; }
+    .diag-sheet.diseased { background: var(--danger-bg); border-color: #fca5a5; }
+    .diag-sheet.warning { background: var(--warning-bg); border-color: #fcd34d; }
+
+    .diag-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .status-tag {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+      padding: 3px 8px; border-radius: 4px;
+    }
+    .status-tag.healthy { background: #16a34a; color: #fff; }
+    .status-tag.diseased { background: #dc2626; color: #fff; }
+    .status-tag.warning { background: #d97706; color: #fff; }
+
+    .diag-condition { font-size: 20px; font-weight: 800; color: var(--text-main); line-height: 1.2; margin-top: 4px; }
+    .diag-crop { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+
+    .conf-score { text-align: right; font-size: 26px; font-weight: 800; }
+    .conf-score.healthy { color: #16a34a; }
+    .conf-score.diseased { color: #dc2626; }
+    .conf-score.warning { color: #d97706; }
+    .conf-caption { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+
+    /* Top 5 Probability Bars */
+    .prob-bar-item { margin-bottom: 8px; }
+    .prob-bar-info { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+    .prob-track { height: 6px; background: #e5ece7; border-radius: 999px; overflow: hidden; }
+    .prob-fill { height: 100%; background: var(--accent); border-radius: 999px; }
+
+    /* Treatment Expandable Pills */
+    .remedy-box {
+      background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 12px; margin-top: 10px;
+    }
+    .remedy-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--primary); margin-bottom: 6px; }
+    .remedy-text { font-size: 13px; color: var(--text-main); line-height: 1.5; }
+
+    /* AI Chat Tab */
+    .chat-container { display: flex; flex-direction: column; height: 65vh; }
+    .chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 12px; }
+    .chat-msg {
+      max-width: 86%; padding: 10px 14px; border-radius: var(--radius-md); font-size: 13px; line-height: 1.5;
+    }
+    .chat-msg.bot {
+      background: var(--accent-soft); color: var(--text-main); border: 1px solid var(--border); align-self: flex-start;
+    }
+    .chat-msg.user {
+      background: var(--primary); color: #ffffff; align-self: flex-end;
+    }
+    .chat-input-bar { display: flex; gap: 8px; margin-top: 10px; }
+    .chat-input {
+      flex: 1; padding: 11px 14px; border-radius: var(--radius-md);
+      border: 1px solid var(--border); font-size: 13px; outline: none; font-family: inherit;
+    }
+    .chat-input:focus { border-color: var(--accent); }
+    .chat-send-btn {
+      padding: 0 16px; border-radius: var(--radius-md); background: var(--primary);
+      border: none; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .chat-send-btn svg { width: 18px; height: 18px; stroke: #fff; }
+
+    /* Crops Catalog Grid */
+    .search-box {
+      width: 100%; padding: 11px 14px; border-radius: var(--radius-md);
+      border: 1px solid var(--border); font-size: 13px; outline: none; font-family: inherit; margin-bottom: 14px;
+    }
+    .crops-list { display: flex; flex-direction: column; gap: 8px; }
+    .crop-item {
+      background: #fff; border: 1px solid var(--border); border-radius: var(--radius-md);
+      padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .crop-item-name { font-size: 13px; font-weight: 700; color: var(--text-main); }
+    .crop-item-cond { font-size: 12px; color: var(--text-muted); }
+
+    /* Onboarding Modal */
+    .onboard-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(15, 35, 23, 0.7);
+      backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .onboard-card {
+      width: 100%; max-width: 420px; background: #ffffff;
+      border-radius: var(--radius-xl); padding: 32px 26px;
+      box-shadow: var(--shadow-lg); border: 1px solid var(--border);
+    }
+    .onboard-h1 { font-size: 22px; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
+    .onboard-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.4; }
+
+    .form-group { margin-bottom: 18px; text-align: left; }
+    .form-label {
+      display: block; font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: var(--primary); margin-bottom: 6px;
+    }
+    .form-input, .form-select {
+      width: 100%; padding: 12px 14px; border-radius: var(--radius-md);
+      border: 1.5px solid var(--border); font-size: 14px; outline: none; font-family: inherit;
+      background: var(--accent-soft); color: var(--text-main);
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: var(--accent); background: #fff;
+    }
+
+    .spinner-sm {
+      width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile Frame Container -->
+  <div class="app-frame">
+
+    <!-- Top App Bar -->
+    <header class="top-bar">
+      <a href="index.html" class="brand-group">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">Ksetrin</div>
+          <div class="brand-sub">Crop Intelligence</div>
+        </div>
+      </a>
+
+      <div class="top-meta">
+        <div class="user-pill" onclick="openOnboarding()" id="top-user-pill" title="Click to edit profile">
+          <span class="online-dot"></span>
+          <span id="top-user-name">Farmer</span>
+        </div>
+        <button type="button" class="btn-signout" onclick="signOut()" title="Sign Out to Login Page" style="background:none; border:1px solid var(--border); border-radius:var(--radius-sm); padding:6px; cursor:pointer; color:var(--text-muted); display:flex; align-items:center; justify-content:center;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Views Container -->
+    <main class="app-content">
+
+      <!-- Tab 1: HOME VIEW -->
+      <section class="tab-view active" id="view-home">
+        <div class="hero-greeting">
+          <div class="greeting-name" id="home-greeting">Welcome, Farmer</div>
+          <div class="greeting-role-badge" id="home-role-badge">Detection Mode</div>
+        </div>
+
+        <div class="purpose-banner" id="home-purpose-desc">
+          Your workspace is configured for field disease detection and immediate certified agronomic treatments.
+        </div>
+
+        <!-- Quick Action Card -->
+        <div class="card">
+          <div class="card-title">
+            <span>Quick Diagnosis</span>
+            <span style="font-size:11px; font-weight:600; color:var(--accent);">MobileNetV2</span>
+          </div>
+          <div class="card-subtitle" style="margin-bottom:14px;">
+            Snap or select a plant leaf photo for real-time disease diagnosis and confidence rating.
+          </div>
+          <button type="button" class="btn-action" onclick="switchNavTab('scan')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <span>Scan Leaf Now</span>
+          </button>
+        </div>
+
+        <!-- AI Assistant Mini Card -->
+        <div class="card">
+          <div class="card-title">
+            <span>AI Agronomist Assistant</span>
+            <span style="font-size:11px; color:var(--text-muted);">Groq Neural</span>
+          </div>
+          <div class="card-subtitle" style="margin-bottom:12px;">
+            Ask questions regarding fungicide dosage, organic pest remedies, or prevention tips.
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="home-quick-chat-input" class="form-input" style="padding:10px 12px; font-size:13px;" placeholder="e.g. How to treat Tomato Early Blight?" onkeydown="if(event.key==='Enter') sendQuickHomeChat()" />
+            <button class="btn-action" style="width:auto; padding:0 16px;" onclick="sendQuickHomeChat()">Ask</button>
+          </div>
+          <div id="home-quick-chat-reply" style="display:none; margin-top:12px; padding:12px; border-radius:var(--radius-sm); background:var(--accent-soft); font-size:13px; line-height:1.5;"></div>
+        </div>
+
+        <!-- Crop Health Coverage Overview -->
+        <div class="card">
+          <div class="card-title">
+            <span>Crop Health Coverage</span>
+            <span style="font-size:12px; font-weight:700; color:var(--accent);">Universal Pathology</span>
+          </div>
+          <div class="card-subtitle">
+            Supported crops: Apple, Blueberry, Cherry, Corn, Grape, Orange, Peach, Pepper, Potato, Raspberry, Soybean, Squash, Strawberry, and Tomato.
+          </div>
+          <button type="button" class="btn-outline" style="margin-top:12px;" onclick="switchNavTab('crops')">
+            <span>Explore Pathology Directory</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Tab 2: SCAN VIEW -->
+      <section class="tab-view" id="view-scan">
+        <div style="margin-bottom:14px;">
+          <h2 style="font-size:18px; font-weight:700;">Leaf Scanner</h2>
+          <p style="font-size:12px; color:var(--text-muted);">Choose a leaf sample or capture an image to analyze.</p>
+        </div>
+
+        <!-- 1-Click Samples -->
+        <div style="margin-bottom:12px;">
+          <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px;">1-Click Test Samples</div>
+          <div class="samples-scroll" id="samples-container">
+            <div style="font-size:12px; color:var(--text-muted); padding:6px;">Loading samples...</div>
+          </div>
+        </div>
+
+        <!-- Dropzone -->
+        <div class="scan-dropzone" id="scan-dropzone" onclick="document.getElementById('leaf-file-input').click()">
+          <input type="file" id="leaf-file-input" accept="image/*" style="display:none;" onchange="handleFileSelect(event)" />
+          <div class="scan-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </div>
+          <div class="scan-title">Tap to Upload Leaf Photo</div>
+          <div class="scan-hint">JPG, PNG supported</div>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-bottom:14px;">
+          <button type="button" class="btn-outline" onclick="document.getElementById('leaf-file-input').click()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>Browse File</span>
+          </button>
+          <button type="button" class="btn-outline" onclick="openMobileCamera()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <span>Take Photo</span>
+          </button>
+        </div>
+
+        <!-- Preview Stage & Laser -->
+        <div class="preview-stage" id="preview-stage">
+          <img id="preview-img" class="preview-img" alt="Leaf Preview" />
+          <div class="scanner-laser" id="scanner-laser"></div>
+        </div>
+
+        <!-- Run Analysis Button -->
+        <button type="button" class="btn-action" id="btn-run-analysis" onclick="executeInference()" disabled>
+          <span id="btn-run-text">Run MobileNetV2 Analysis</span>
+          <span class="spinner-sm" id="btn-run-spinner"></span>
+        </button>
+
+        <!-- Diagnostic Bottom Sheet / Card -->
+        <div class="diag-sheet" id="diag-sheet">
+          <div class="diag-header">
+            <div>
+              <span class="status-tag" id="diag-status-tag">Diagnosis</span>
+              <div class="diag-crop" id="diag-crop-label">Crop</div>
+              <div class="diag-condition" id="diag-cond-label">Condition</div>
+            </div>
+            <div class="conf-score" id="diag-conf-score">99%
+              <div class="conf-caption">Confidence</div>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div style="font-size:13px; color:var(--text-main); margin:10px 0; line-height:1.5;" id="diag-desc-text"></div>
+
+          <!-- Top 3 Probability Breakdown -->
+          <div style="margin:14px 0 10px;">
+            <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">Model Probability Spread</div>
+            <div id="prob-spread-list"></div>
+          </div>
+
+          <!-- Actionable Treatment Cards -->
+          <div class="remedy-box">
+            <div class="remedy-title">Organic & Cultural Action</div>
+            <div class="remedy-text" id="remedy-organic"></div>
+          </div>
+
+          <div class="remedy-box">
+            <div class="remedy-title">Certified Chemical Protection</div>
+            <div class="remedy-text" id="remedy-chemical"></div>
+          </div>
+
+          <div class="remedy-box">
+            <div class="remedy-title">Field Prevention</div>
+            <div class="remedy-text" id="remedy-prevention"></div>
+          </div>
+
+          <button class="btn-outline" style="margin-top:14px;" onclick="askAIAssistantAboutResult()">
+            <span>Ask AI Assistant About This Result →</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Tab 3: AI ASSISTANT VIEW -->
+      <section class="tab-view" id="view-chat">
+        <div style="margin-bottom:14px;">
+          <h2 style="font-size:18px; font-weight:700;">AI Agronomist</h2>
+          <p style="font-size:12px; color:var(--text-muted);">Real-time agronomic consultation powered by Groq neural intelligence.</p>
+        </div>
+
+        <div class="chat-container">
+          <div class="chat-messages" id="chat-messages">
+            <div class="chat-msg bot">
+              Hello. I am Ksetrin AI. How can I assist you with crop health, disease management, or treatment protocols today?
+            </div>
+          </div>
+          <div class="chat-input-bar">
+            <input type="text" id="chat-user-input" class="chat-input" placeholder="Ask your question..." onkeydown="if(event.key==='Enter') sendChatMessage()" />
+            <button type="button" class="chat-send-btn" onclick="sendChatMessage()">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 4: CROPS DIRECTORY VIEW -->
+      <section class="tab-view" id="view-crops">
+        <div style="margin-bottom:14px;">
+          <h2 style="font-size:18px; font-weight:700;">Pathology Directory</h2>
+          <p style="font-size:12px; color:var(--text-muted);">Comprehensive plant health conditions & field pathology directory.</p>
+        </div>
+
+        <input type="text" class="search-box" id="crops-search" placeholder="Search crops or diseases..." oninput="filterCropsList(this.value)" />
+
+        <div class="crops-list" id="crops-list">
+          <div style="font-size:12px; color:var(--text-muted); padding:10px;">Loading directory...</div>
+        </div>
+      </section>
+
+      <!-- Tab 5: PROFILE VIEW -->
+      <section class="tab-view" id="view-profile">
+        <div style="margin-bottom:14px;">
+          <h2 style="font-size:18px; font-weight:700;">Workspace Profile</h2>
+          <p style="font-size:12px; color:var(--text-muted);">Your personalized identity and purpose in Ksetrin.</p>
+        </div>
+
+        <div class="card">
+          <div style="font-size:12px; font-weight:600; text-transform:uppercase; color:var(--text-muted);">User Name</div>
+          <div style="font-size:18px; font-weight:700; margin-top:2px;" id="profile-display-name">Farmer</div>
+          
+          <div style="font-size:12px; font-weight:600; text-transform:uppercase; color:var(--text-muted); margin-top:14px;">Selected Purpose</div>
+          <div style="font-size:15px; font-weight:600; margin-top:2px; color:var(--accent);" id="profile-display-purpose">Detection</div>
+
+          <button class="btn-outline" style="margin-top:18px;" onclick="openOnboarding()">
+            <span>Change Name & Purpose</span>
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">System Status</div>
+          <div style="font-size:13px; line-height:1.6; color:var(--text-muted);">
+            • Model: MobileNetV2 Fine-Tuned<br />
+            • Coverage: Universal Multi-Crop Pathology<br />
+            • Engine: TensorFlow CPU + Groq Neural LLM<br />
+            • Host: Localhost:8080
+          </div>
+          <button class="btn-outline" style="margin-top:16px; color:var(--danger); border-color:#fca5a5;" onclick="signOut()">
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <button type="button" class="nav-tab-btn active" id="tab-btn-home" onclick="switchNavTab('home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Home</span>
+      </button>
+
+      <button type="button" class="nav-tab-btn" id="tab-btn-scan" onclick="switchNavTab('scan')">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span>Scan</span>
+      </button>
+
+      <button type="button" class="nav-tab-btn" id="tab-btn-chat" onclick="switchNavTab('chat')">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>AI Chat</span>
+      </button>
+
+      <button type="button" class="nav-tab-btn" id="tab-btn-crops" onclick="switchNavTab('crops')">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Crops</span>
+      </button>
+
+      <button type="button" class="nav-tab-btn" id="tab-btn-profile" onclick="switchNavTab('profile')">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Profile</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- Onboarding / Personalization Modal -->
+  <div class="onboard-overlay" id="onboard-overlay" style="display:none;">
+    <div class="onboard-card">
+      <div class="onboard-h1">Welcome to Ksetrin</div>
+      <div class="onboard-sub">Configure your personal workspace before continuing.</div>
+
+      <form id="onboard-form" onsubmit="handleOnboardSubmit(event)">
+        <div class="form-group">
+          <label class="form-label" for="input-onboard-name">What should we call you?</label>
+          <input type="text" id="input-onboard-name" class="form-input" placeholder="Your name or organization" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="select-onboard-purpose">Why are you using our website?</label>
+          <select id="select-onboard-purpose" class="form-select" required>
+            <option value="Detection">Detection (Field Disease Diagnosis & Treatment)</option>
+            <option value="Research">Research (Academic Study & Model Evaluation)</option>
+            <option value="Verification">Verification (Crop Quality Inspection & Audit)</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-action" style="margin-top:10px;">
+          <span>Enter Workspace</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = (window.location.protocol === 'file:' || !window.location.port) ? 'http://localhost:8080' : '';
+    let currentFile = null;
+    let currentSample = null;
+    let currentDiagnosis = null;
+    let allCrops = [];
+
+    // On Load
+    window.addEventListener('DOMContentLoaded', () => {
+      checkUserProfile();
+      loadSamples();
+      loadCrops();
+    });
+
+    // Check Profile in localStorage
+    function checkUserProfile() {
+      const saved = localStorage.getItem('ksetrin_user_profile');
+      if (!saved) {
+        openOnboarding();
+      } else {
+        try {
+          const profile = JSON.parse(saved);
+          applyUserProfile(profile.name, profile.purpose);
+        } catch (e) {
+          openOnboarding();
+        }
+      }
+    }
+
+    function openOnboarding() {
+      const saved = localStorage.getItem('ksetrin_user_profile');
+      if (saved) {
+        try {
+          const p = JSON.parse(saved);
+          document.getElementById('input-onboard-name').value = p.name || '';
+          document.getElementById('select-onboard-purpose').value = p.purpose || 'Detection';
+        } catch(e){}
+      }
+      document.getElementById('onboard-overlay').style.display = 'flex';
+    }
+
+    function handleOnboardSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('input-onboard-name').value.trim() || 'User';
+      const purpose = document.getElementById('select-onboard-purpose').value;
+      
+      const profile = { name, purpose, date: new Date().toISOString() };
+      localStorage.setItem('ksetrin_user_profile', JSON.stringify(profile));
+      
+      applyUserProfile(name, purpose);
+      document.getElementById('onboard-overlay').style.display = 'none';
+    }
+
+    function applyUserProfile(name, purpose) {
+      document.getElementById('top-user-name').textContent = name;
+      document.getElementById('home-greeting').textContent = 'Welcome, ' + name;
+      document.getElementById('home-role-badge').textContent = purpose + ' Mode';
+      
+      document.getElementById('profile-display-name').textContent = name;
+      document.getElementById('profile-display-purpose').textContent = purpose;
+
+      const descEl = document.getElementById('home-purpose-desc');
+      if (purpose === 'Research') {
+        descEl.textContent = 'Workspace configured for MobileNetV2 neural validation, accuracy benchmarking, and multi-crop pathology research.';
+      } else if (purpose === 'Verification') {
+        descEl.textContent = 'Workspace configured for harvest quality audit, disease screening, and certified export reports.';
+      } else {
+        descEl.textContent = 'Workspace configured for field disease diagnosis and immediate certified organic/chemical treatments.';
+      }
+    }
+
+    // Switch Navigation Tabs
+    function switchNavTab(tabId) {
+      const tabs = ['home', 'scan', 'chat', 'crops', 'profile'];
+      tabs.forEach(t => {
+        const viewEl = document.getElementById('view-' + t);
+        const btnEl = document.getElementById('tab-btn-' + t);
+        if (viewEl) viewEl.classList.toggle('active', t === tabId);
+        if (btnEl) btnEl.classList.toggle('active', t === tabId);
+      });
+      window.scrollTo(0, 0);
+    }
+
+    // Load 1-Click Samples
+    async function loadSamples() {
+      const container = document.getElementById('samples-container');
+      try {
+        const res = await fetch(API_BASE + '/api/samples');
+        const data = await res.json();
+        if (data.samples && data.samples.length > 0) {
+          container.innerHTML = data.samples.map(s => {
+            const imgUrl = s.url.startsWith('http') ? s.url : (API_BASE + s.url);
+            return `
+              <div class="sample-pill" onclick="selectTestSample('${s.filename}', '${imgUrl}')">
+                <img src="${imgUrl}" alt="${s.title}" loading="lazy" />
+                <div class="sample-pill-text">
+                  <div class="sample-pill-name">${s.title}</div>
+                  <div class="sample-pill-sub">Tap to scan</div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          container.innerHTML = '<div style="font-size:12px; color:var(--text-muted);">No sample leaves found.</div>';
+        }
+      } catch (err) {
+        container.innerHTML = '<div style="font-size:12px; color:var(--danger);">Error loading samples.</div>';
+      }
+    }
+
+    // Select Sample
+    function selectTestSample(filename, imgUrl) {
+      currentSample = filename;
+      currentFile = null;
+      showPreview(imgUrl);
+      executeInference();
+    }
+
+    function handleFileSelect(e) {
+      const files = e.target.files;
+      if (files && files.length > 0) {
+        currentFile = files[0];
+        currentSample = null;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          showPreview(evt.target.result);
+        };
+        reader.readAsDataURL(files[0]);
+      }
+    }
+
+    function showPreview(src) {
+      document.getElementById('preview-img').src = src;
+      document.getElementById('preview-stage').style.display = 'block';
+      document.getElementById('btn-run-analysis').disabled = false;
+    }
+
+    function openMobileCamera() {
+      document.getElementById('leaf-file-input').setAttribute('capture', 'environment');
+      document.getElementById('leaf-file-input').click();
+    }
+
+    // Execute Inference
+    async function executeInference() {
+      const btn = document.getElementById('btn-run-analysis');
+      const text = document.getElementById('btn-run-text');
+      const spinner = document.getElementById('btn-run-spinner');
+      const laser = document.getElementById('scanner-laser');
+
+      btn.disabled = true;
+      text.textContent = 'Analyzing Leaf...';
+      spinner.style.display = 'inline-block';
+      laser.classList.add('active');
+
+      try {
+        let result = null;
+        if (currentSample) {
+          const res = await fetch(API_BASE + '/api/predict/json', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sample_name: currentSample })
+          });
+          result = await res.json();
+        } else if (currentFile) {
+          const form = new FormData();
+          form.append('file', currentFile);
+          const res = await fetch(API_BASE + '/api/predict', {
+            method: 'POST',
+            body: form
+          });
+          result = await res.json();
+        }
+
+        if (result && result.success) {
+          currentDiagnosis = result;
+          renderDiagnosisResult(result);
+        } else {
+          alert('Diagnosis failed: ' + (result?.detail || 'Inference error'));
+        }
+      } catch (err) {
+        alert('Server connection error. Make sure server is running on ' + API_BASE);
+      } finally {
+        btn.disabled = false;
+        text.textContent = 'Run MobileNetV2 Analysis';
+        spinner.style.display = 'none';
+        laser.classList.remove('active');
+      }
+    }
+
+    function renderDiagnosisResult(d) {
+      const sheet = document.getElementById('diag-sheet');
+      sheet.style.display = 'block';
+
+      const statusType = d.is_unknown ? 'warning' : (d.is_healthy ? 'healthy' : 'diseased');
+      sheet.className = 'diag-sheet ' + statusType;
+
+      const tagEl = document.getElementById('diag-status-tag');
+      tagEl.className = 'status-tag ' + statusType;
+      tagEl.textContent = d.is_unknown ? 'Low Confidence' : (d.is_healthy ? 'Healthy Leaf' : 'Pathogen Detected');
+
+      document.getElementById('diag-crop-label').textContent = d.crop;
+      document.getElementById('diag-cond-label').textContent = d.condition;
+      
+      const confScoreEl = document.getElementById('diag-conf-score');
+      confScoreEl.className = 'conf-score ' + statusType;
+      confScoreEl.innerHTML = d.confidence + '%<div class="conf-caption">Confidence</div>';
+
+      document.getElementById('diag-desc-text').textContent = d.description;
+
+      // Probabilities
+      const spreadEl = document.getElementById('prob-spread-list');
+      spreadEl.innerHTML = (d.top5 || []).slice(0, 3).map(p => `
+        <div class="prob-bar-item">
+          <div class="prob-bar-info">
+            <span>${p.crop} - ${p.condition}</span>
+            <span>${p.confidence}%</span>
+          </div>
+          <div class="prob-track">
+            <div class="prob-fill" style="width:${p.confidence}%;"></div>
+          </div>
+        </div>
+      `).join('');
+
+      // Remedies
+      document.getElementById('remedy-organic').textContent = (d.organic_treatment || []).join('; ') || 'No treatment required.';
+      document.getElementById('remedy-chemical').textContent = (d.chemical_treatment || []).join('; ') || 'No chemical treatment needed.';
+      document.getElementById('remedy-prevention').textContent = (d.prevention || []).join('; ') || 'Standard crop monitoring.';
+
+      // Scroll into view smoothly
+      sheet.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function askAIAssistantAboutResult() {
+      if (!currentDiagnosis) return;
+      switchNavTab('chat');
+      const input = document.getElementById('chat-user-input');
+      input.value = `I just diagnosed ${currentDiagnosis.crop} with ${currentDiagnosis.condition}. What specific steps should I take next?`;
+      sendChatMessage();
+    }
+
+    // AI Chat System
+    async function sendChatMessage() {
+      const input = document.getElementById('chat-user-input');
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      input.value = '';
+      appendChatMessage('user', msg);
+
+      const saved = localStorage.getItem('ksetrin_user_profile');
+      let userName = 'Farmer', userPurpose = 'Detection';
+      if (saved) {
+        try {
+          const p = JSON.parse(saved);
+          userName = p.name || 'Farmer';
+          userPurpose = p.purpose || 'Detection';
+        } catch(e){}
+      }
+
+      const botMsgId = appendChatMessage('bot', 'Analyzing question...');
+
+      try {
+        const res = await fetch(API_BASE + '/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: msg,
+            user_name: userName,
+            user_purpose: userPurpose,
+            context: currentDiagnosis ? `${currentDiagnosis.crop} - ${currentDiagnosis.condition}` : null
+          })
+        });
+        const data = await res.json();
+        const replyText = data.success ? data.reply : 'Unable to retrieve answer from AI service.';
+        document.getElementById(botMsgId).textContent = replyText;
+      } catch (err) {
+        document.getElementById(botMsgId).textContent = 'Connection error contacting AI service.';
+      }
+    }
+
+    function appendChatMessage(sender, text) {
+      const container = document.getElementById('chat-messages');
+      const div = document.createElement('div');
+      const msgId = 'msg-' + Date.now();
+      div.id = msgId;
+      div.className = 'chat-msg ' + sender;
+      div.textContent = text;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+      return msgId;
+    }
+
+    // Quick Chat on Home Tab
+    async function sendQuickHomeChat() {
+      const input = document.getElementById('home-quick-chat-input');
+      const replyBox = document.getElementById('home-quick-chat-reply');
+      const q = input.value.trim();
+      if (!q) return;
+
+      replyBox.style.display = 'block';
+      replyBox.textContent = 'Consulting AI Agronomist...';
+
+      const saved = localStorage.getItem('ksetrin_user_profile');
+      let userName = 'Farmer', userPurpose = 'Detection';
+      if (saved) {
+        try {
+          const p = JSON.parse(saved);
+          userName = p.name; userPurpose = p.purpose;
+        } catch(e){}
+      }
+
+      try {
+        const res = await fetch(API_BASE + '/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: q,
+            user_name: userName,
+            user_purpose: userPurpose
+          })
+        });
+        const data = await res.json();
+        replyBox.textContent = data.success ? data.reply : 'AI service temporarily unavailable.';
+      } catch (e) {
+        replyBox.textContent = 'Error contacting AI Agronomist.';
+      }
+    }
+
+    // Crops Catalog
+    async function loadCrops() {
+      try {
+        const res = await fetch(API_BASE + '/api/classes');
+        const data = await res.json();
+        allCrops = data.classes || [];
+        renderCropsList(allCrops);
+      } catch (err) {}
+    }
+
+    function renderCropsList(list) {
+      const container = document.getElementById('crops-list');
+      if (!container) return;
+      container.innerHTML = list.map(c => `
+        <div class="crop-item">
+          <div>
+            <div class="crop-item-name">${c.crop}</div>
+            <div class="crop-item-cond">${c.condition}</div>
+          </div>
+          <span style="font-size:11px; font-weight:700; color:${c.is_healthy ? 'var(--accent)' : 'var(--danger)'};">
+            ${c.is_healthy ? 'Healthy' : 'Disease'}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    function filterCropsList(query) {
+      const q = query.toLowerCase().trim();
+      const filtered = allCrops.filter(c =>
+        c.crop.toLowerCase().includes(q) || c.condition.toLowerCase().includes(q)
+      );
+      renderCropsList(filtered);
+    }
+
+    function signOut() {
+      localStorage.removeItem('ksetrin_user_profile');
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+</html>

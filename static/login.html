@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="description" content="Kṣetrin – Precision Crop Disease Intelligence Platform. Mobile Sign In." />
+  <title>Kṣetrin | Sign In</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Serif+Devanagari:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-900: #052e16;
+      --green-800: #14532d;
+      --green-700: #15803d;
+      --green-600: #16a34a;
+      --green-500: #22c55e;
+      --green-400: #4ade80;
+      --green-300: #86efac;
+      --white:     #ffffff;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html, body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--white);
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      background: #052e16;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      overflow-x: hidden;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       DESKTOP PREVIEW (Clean centered mobile column, no fake phone hardware)
+       ══════════════════════════════════════════════════════ */
+    @media (min-width: 501px) {
+      body {
+        background: radial-gradient(circle at 50% 30%, #0e301d 0%, #05140b 70%, #020704 100%);
+        align-items: center;
+        padding: 20px 0;
+      }
+
+      .app-container {
+        width: 100%;
+        max-width: 440px;
+        height: 860px;
+        max-height: 94vh;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+    }
+
+    /* ══════════════════════════════════════════════════════
+       NATIVE MOBILE (100% full screen on actual phones)
+       ══════════════════════════════════════════════════════ */
+    @media (max-width: 500px) {
+      body {
+        padding: 0;
+        margin: 0;
+        background: #052e16;
+      }
+
+      .app-container {
+        width: 100vw;
+        min-height: 100vh;
+        min-height: 100dvh;
+        border-radius: 0;
+        border: none;
+        box-shadow: none;
+      }
+    }
+
+    /* ══════════════════════════════════════════════════════
+       MAIN MOBILE VIEW CONTAINER
+       ══════════════════════════════════════════════════════ */
+    .app-container {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #052e16;
+    }
+
+    /* Slideshow cycling the 6 farm images */
+    .slideshow {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center 20%;
+      opacity: 0;
+      animation: slideShow 36s infinite;
+      transform: scale(1.06);
+      transition: opacity 1.5s ease;
+    }
+
+    /* 3 newest farm photos cycle first */
+    .slide:nth-child(1) { background-image: url('images/bg4.jpg'); animation-delay: 0s; }
+    .slide:nth-child(2) { background-image: url('images/bg5.jpg'); animation-delay: 6s; }
+    .slide:nth-child(3) { background-image: url('images/bg6.jpg'); animation-delay: 12s; }
+    .slide:nth-child(4) { background-image: url('images/bg1.jpg'); animation-delay: 18s; }
+    .slide:nth-child(5) { background-image: url('images/bg2.jpg'); animation-delay: 24s; }
+    .slide:nth-child(6) { background-image: url('images/bg3.jpg'); animation-delay: 30s; }
+
+    @keyframes slideShow {
+      0%    { opacity: 0; transform: scale(1.06); }
+      5%    { opacity: 1; transform: scale(1.02); }
+      16.6% { opacity: 1; transform: scale(1.0);  }
+      22%   { opacity: 0; transform: scale(1.0);  }
+      100%  { opacity: 0; transform: scale(1.06); }
+    }
+
+    /* Atmospheric Dark Emerald Overlay */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+      background: linear-gradient(
+        180deg,
+        rgba(5, 46, 22, 0.45) 0%,
+        rgba(21, 128, 61, 0.16) 35%,
+        rgba(5, 46, 22, 0.88) 100%
+      );
+    }
+
+    /* Ambient Floating Particles */
+    .particles {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 3;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(74, 222, 128, 0.85), rgba(34, 197, 94, 0.0));
+      animation: floatUp linear infinite;
+    }
+
+    .p1  { width:7px;  height:7px;  left:10%;  animation-duration:14s; animation-delay:0s; }
+    .p2  { width:5px;  height:5px;  left:26%;  animation-duration:18s; animation-delay:2s; }
+    .p3  { width:9px;  height:9px;  left:44%;  animation-duration:12s; animation-delay:4s; }
+    .p4  { width:6px;  height:6px;  left:68%;  animation-duration:16s; animation-delay:1s; }
+    .p5  { width:4px;  height:4px;  left:85%;  animation-duration:20s; animation-delay:6s; }
+
+    @keyframes floatUp {
+      0%   { bottom: 40%; opacity: 0; transform: translateX(0); }
+      15%  { opacity: 0.8; }
+      85%  { opacity: 0.4; }
+      100% { bottom: 105%; opacity: 0; transform: translateX(25px); }
+    }
+
+    /* ══════════════════════════════════════════════════════
+       APP CONTENT (Cinema Top + Frosted Bottom Sheet)
+       ══════════════════════════════════════════════════════ */
+    .app-content {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-sizing: border-box;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+    }
+    .app-content::-webkit-scrollbar { display: none; }
+
+    /* 1. Cinema Top */
+    .cinema-top {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: calc(18px + env(safe-area-inset-top, 0px)) 16px 10px;
+      flex-shrink: 0;
+    }
+
+    .brand-logo-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.16);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #86efac;
+      margin-bottom: 6px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    .brand-logo-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: #86efac;
+    }
+
+    .brand-name {
+      font-size: 1.95rem;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #ffffff 45%, #86efac 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .brand-name-deva {
+      font-family: 'Noto Serif Devanagari', serif;
+      font-size: 0.88rem;
+      font-weight: 400;
+      color: #86efac;
+      letter-spacing: 0.04em;
+      margin-top: 3px;
+      display: block;
+      opacity: 0.95;
+    }
+
+    .typewriter-line {
+      font-size: 0.82rem;
+      color: #d1fae5;
+      min-height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-weight: 500;
+      margin-top: 6px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 14px;
+      background: #86efac;
+      animation: blink 0.8s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* Scenery Window in Middle */
+    .scenery-spacer {
+      flex: 1;
+      min-height: 30px;
+    }
+
+    /* 2. Frosted Emerald Glass Bottom Sheet */
+    .bottom-sheet {
+      position: relative;
+      z-index: 20;
+      width: 100%;
+      box-sizing: border-box;
+      background: rgba(10, 32, 18, 0.68);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border-top: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 28px 28px 0 0;
+      padding: 18px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+      color: #ffffff;
+      flex-shrink: 0;
+    }
+
+    /* Tab Switcher */
+    .tab-group {
+      display: flex;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 12px;
+      padding: 3px;
+      margin-bottom: 14px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 8px 0;
+      border: none;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.65);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: center;
+    }
+
+    .tab-btn.active {
+      background: #16a34a;
+      color: #ffffff;
+      box-shadow: 0 2px 10px rgba(22, 163, 74, 0.45);
+    }
+
+    .form-panel {
+      display: none;
+    }
+
+    .form-panel.active {
+      display: block;
+      animation: fadeIn 0.22s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #86efac;
+      margin-bottom: 5px;
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 12px;
+      color: rgba(255, 255, 255, 0.45);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon svg {
+      width: 17px;
+      height: 17px;
+      stroke: currentColor;
+    }
+
+    .form-input {
+      width: 100%;
+      height: 42px;
+      padding: 0 40px 0 38px;
+      background: rgba(0, 0, 0, 0.32);
+      border: 1.5px solid rgba(255, 255, 255, 0.16);
+      border-radius: 11px;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 0.88rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .form-input::placeholder {
+      color: rgba(255, 255, 255, 0.38);
+    }
+
+    .form-input:focus {
+      background: rgba(0, 0, 0, 0.50);
+      border-color: #4ade80;
+      box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.20);
+    }
+
+    .eye-btn {
+      position: absolute;
+      right: 12px;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.45);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+
+    .eye-btn:hover {
+      color: #86efac;
+    }
+
+    .eye-btn svg {
+      width: 17px;
+      height: 17px;
+      stroke: currentColor;
+    }
+
+    .form-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 10px 0 14px;
+      font-size: 0.78rem;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.85);
+      user-select: none;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      accent-color: #16a34a;
+      cursor: pointer;
+    }
+
+    .link-btn {
+      background: none;
+      border: none;
+      color: #86efac;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .link-btn:hover {
+      color: #4ade80;
+    }
+
+    /* Submit Button */
+    .submit-btn {
+      width: 100%;
+      height: 44px;
+      background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 12px;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 16px rgba(22, 163, 74, 0.40);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .submit-btn:hover {
+      background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(34, 197, 94, 0.45);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .btn-spinner {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 12px 0 10px;
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 0.70rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    /* Social Row */
+    .social-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .social-btn {
+      flex: 1;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1.5px solid rgba(255, 255, 255, 0.18);
+      border-radius: 11px;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .social-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.30);
+      transform: translateY(-1px);
+    }
+
+    .social-btn svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    /* Password Strength Segments */
+    .strength-bar-wrap {
+      margin-top: 5px;
+      display: flex;
+      gap: 4px;
+    }
+
+    .strength-seg {
+      flex: 1;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 2px;
+      transition: background 0.3s;
+    }
+
+    .sheet-footer {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 0.68rem;
+      color: rgba(255, 255, 255, 0.50);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Clean Mobile View Container (Edge-to-edge on phones, clean mobile column on desktop) -->
+  <div class="app-container">
+
+    <!-- 6-Image Cycling Slideshow contained in mobile view -->
+    <div class="slideshow" aria-hidden="true">
+      <div class="slide"></div>
+      <div class="slide"></div>
+      <div class="slide"></div>
+      <div class="slide"></div>
+      <div class="slide"></div>
+      <div class="slide"></div>
+    </div>
+
+    <!-- Atmospheric Green Gradient Overlay -->
+    <div class="overlay" aria-hidden="true"></div>
+
+    <!-- Ambient Floating Particles -->
+    <div class="particles" aria-hidden="true">
+      <div class="particle p1"></div><div class="particle p2"></div>
+      <div class="particle p3"></div><div class="particle p4"></div>
+      <div class="particle p5"></div>
+    </div>
+
+    <!-- Mobile View Content: Top Cinema + Frosted Bottom Sheet -->
+    <div class="app-content">
+
+      <!-- 1. Top Cinema Brand Header -->
+      <header class="cinema-top">
+        <div class="brand-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+          </svg>
+        </div>
+
+        <h1 class="brand-name">Kṣetrin</h1>
+        <span class="brand-name-deva">क्षेत्रिन् · Guardian of the Field</span>
+
+        <!-- Auto-typing pathology ticker -->
+        <div class="typewriter-line">
+          <span id="typewriter"></span>
+          <span class="cursor"></span>
+        </div>
+      </header>
+
+      <!-- Middle Scenery View Area -->
+      <div class="scenery-spacer"></div>
+
+      <!-- 2. Frosted Emerald Glass Bottom Sheet -->
+      <section class="bottom-sheet" role="main" aria-label="Authentication">
+
+        <!-- Segmented Tab Group -->
+        <div class="tab-group" role="tablist">
+          <button type="button" class="tab-btn active" id="tab-signin" role="tab" aria-selected="true"
+                  aria-controls="panel-signin" onclick="switchTab('signin')">Sign In</button>
+          <button type="button" class="tab-btn" id="tab-signup" role="tab" aria-selected="false"
+                  aria-controls="panel-signup" onclick="switchTab('signup')">Create Account</button>
+        </div>
+
+        <!-- Sign In Panel -->
+        <div class="form-panel active" id="panel-signin" role="tabpanel" aria-labelledby="tab-signin">
+          <form id="form-signin" onsubmit="handleSignIn(event)" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="si-email">Email Address</label>
+              <div class="input-wrap">
+                <input class="form-input" type="email" id="si-email" placeholder="farmer@field.org"
+                       value="farmer@field.org" autocomplete="email" required />
+                <span class="input-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="si-password">Password</label>
+              <div class="input-wrap">
+                <input class="form-input" type="password" id="si-password" placeholder="Enter your password"
+                       value="demo1234" autocomplete="current-password" required />
+                <span class="input-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+                <button type="button" class="eye-btn" id="si-eye" aria-label="Toggle password"
+                        onclick="toggleEye('si-password','si-eye')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label class="checkbox-label">
+                <input type="checkbox" id="si-remember" checked />
+                <span>Remember me</span>
+              </label>
+              <button type="button" class="link-btn" onclick="forgotPassword()">Forgot password?</button>
+            </div>
+
+            <button class="submit-btn" type="submit" id="si-submit">
+              <span id="si-btn-text">Sign In →</span>
+              <span class="btn-spinner" id="si-spinner"></span>
+            </button>
+
+            <div class="divider">or continue with</div>
+
+            <div class="social-row">
+              <button type="button" class="social-btn" id="btn-google" onclick="socialLogin('google')">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                <span>Google</span>
+              </button>
+              <button type="button" class="social-btn" id="btn-github" onclick="socialLogin('github')">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+                <span>GitHub</span>
+              </button>
+            </div>
+
+            <div class="sheet-footer">
+              Kṣetrin · Precision Agronomy Intelligence
+            </div>
+          </form>
+        </div>
+
+        <!-- Create Account Panel -->
+        <div class="form-panel" id="panel-signup" role="tabpanel" aria-labelledby="tab-signup">
+          <form id="form-signup" onsubmit="handleSignUp(event)" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="su-name">Full Name</label>
+              <div class="input-wrap">
+                <input class="form-input" type="text" id="su-name" placeholder="Your full name"
+                       autocomplete="name" required />
+                <span class="input-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="su-email">Email Address</label>
+              <div class="input-wrap">
+                <input class="form-input" type="email" id="su-email" placeholder="you@example.com"
+                       autocomplete="email" required />
+                <span class="input-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="su-password">Password</label>
+              <div class="input-wrap">
+                <input class="form-input" type="password" id="su-password" placeholder="Create a strong password"
+                       autocomplete="new-password" required oninput="checkStrength(this.value)" />
+                <span class="input-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+                <button type="button" class="eye-btn" id="su-eye" aria-label="Toggle password"
+                        onclick="toggleEye('su-password','su-eye')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+              <div class="strength-bar-wrap">
+                <div class="strength-seg" id="s1"></div>
+                <div class="strength-seg" id="s2"></div>
+                <div class="strength-seg" id="s3"></div>
+                <div class="strength-seg" id="s4"></div>
+              </div>
+            </div>
+
+            <button class="submit-btn" type="submit" id="su-submit" style="margin-top: 14px;">
+              <span id="su-btn-text">Create Account →</span>
+              <span class="btn-spinner" id="su-spinner"></span>
+            </button>
+
+            <div class="divider">or sign up with</div>
+
+            <div class="social-row">
+              <button type="button" class="social-btn" onclick="socialLogin('google')">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                <span>Google</span>
+              </button>
+              <button type="button" class="social-btn" onclick="socialLogin('github')">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+                <span>GitHub</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </section>
+
+    </div> <!-- /.app-content -->
+  </div> <!-- /.app-container -->
+
+  <script>
+    /* Tab switching */
+    function switchTab(tab) {
+      const isSignIn = tab === 'signin';
+      document.getElementById('tab-signin').classList.toggle('active', isSignIn);
+      document.getElementById('tab-signup').classList.toggle('active', !isSignIn);
+      document.getElementById('tab-signin').setAttribute('aria-selected', isSignIn ? 'true' : 'false');
+      document.getElementById('tab-signup').setAttribute('aria-selected', !isSignIn ? 'true' : 'false');
+      document.getElementById('panel-signin').classList.toggle('active', isSignIn);
+      document.getElementById('panel-signup').classList.toggle('active', !isSignIn);
+    }
+
+    /* Password visibility toggle */
+    function toggleEye(inputId, btnId) {
+      const input = document.getElementById(inputId);
+      const btn = document.getElementById(btnId);
+      if (!input) return;
+      const isPass = input.type === 'password';
+      input.type = isPass ? 'text' : 'password';
+      btn.innerHTML = isPass
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+    }
+
+    /* Password strength indicator */
+    function checkStrength(val) {
+      const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e'];
+      let score = 0;
+      if (val.length >= 6)  score++;
+      if (val.length >= 10) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById('s' + i).style.background = i <= score ? colors[score - 1] : 'rgba(255, 255, 255, 0.18)';
+      }
+    }
+
+    /* Dynamic Typewriter ticker */
+    (function() {
+      const phrases = [
+        'universal multi-crop pathology',
+        'instant leaf scan diagnosis',
+        'confidence-scored prediction',
+        'agronomic remedies & prevention',
+        'multi-crop field intelligence',
+        'powered by deep neural networks'
+      ];
+      const el = document.getElementById('typewriter');
+      if (!el) return;
+      let phraseIdx = 0, charIdx = 0, deleting = false;
+      const TYPING_SPEED = 45, DELETE_SPEED = 22, PAUSE_FULL = 2200, PAUSE_EMPTY = 400;
+
+      function tick() {
+        const phrase = phrases[phraseIdx];
+        if (!deleting) {
+          charIdx++;
+          el.textContent = phrase.slice(0, charIdx);
+          if (charIdx === phrase.length) {
+            deleting = true;
+            setTimeout(tick, PAUSE_FULL);
+            return;
+          }
+        } else {
+          charIdx--;
+          el.textContent = phrase.slice(0, charIdx);
+          if (charIdx === 0) {
+            deleting = false;
+            phraseIdx = (phraseIdx + 1) % phrases.length;
+            setTimeout(tick, PAUSE_EMPTY);
+            return;
+          }
+        }
+        setTimeout(tick, deleting ? DELETE_SPEED : TYPING_SPEED);
+      }
+      tick();
+    })();
+
+    /* Sign In handler */
+    function handleSignIn(e) {
+      if (e) e.preventDefault();
+      const email = document.getElementById('si-email').value.trim();
+      const remember = document.getElementById('si-remember').checked;
+      if (remember && email) {
+        localStorage.setItem('ksetrin_saved_email', email);
+      }
+
+      const btn = document.getElementById('si-submit');
+      const text = document.getElementById('si-btn-text');
+      const sp = document.getElementById('si-spinner');
+      if (btn) btn.disabled = true;
+      if (text) text.textContent = 'Opening Workspace...';
+      if (sp) sp.style.display = 'inline-block';
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 200);
+    }
+
+    /* Sign Up handler */
+    function handleSignUp(e) {
+      if (e) e.preventDefault();
+      const suName = document.getElementById('su-name').value.trim();
+      if (suName) {
+        const profile = { name: suName, purpose: 'Detection', date: new Date().toISOString() };
+        localStorage.setItem('ksetrin_user_profile', JSON.stringify(profile));
+      }
+
+      const btn = document.getElementById('su-submit');
+      const text = document.getElementById('su-btn-text');
+      const sp = document.getElementById('su-spinner');
+      if (btn) btn.disabled = true;
+      if (text) text.textContent = 'Account Created...';
+      if (sp) sp.style.display = 'inline-block';
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 220);
+    }
+
+    /* Social login handler */
+    function socialLogin(provider) {
+      const btn = document.getElementById('btn-' + provider);
+      if (btn) {
+        btn.style.opacity = '0.7';
+        btn.innerHTML = '<span>Connecting...</span>';
+      }
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 200);
+    }
+
+    function forgotPassword() {
+      alert('Password reset instructions will be sent to your email.');
+    }
+  </script>
+</body>
+</html>
