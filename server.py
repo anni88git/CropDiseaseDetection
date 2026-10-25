@@ -103,9 +103,10 @@ def run_model_inference(image: Image.Image):
         # Attempt immediate load if not already started
         load_vit_model()
         if model is None or processor is None:
+            err_msg = f"Vision Transformer initialization error: {model_error}" if model_error else "Vision Transformer is initializing or weights are still being cached. Please retry shortly."
             raise HTTPException(
                 status_code=503, 
-                detail="Vision Transformer is initializing or weights are still being cached. Please retry shortly."
+                detail=err_msg
             )
     
     if image.mode != "RGB":
@@ -118,7 +119,7 @@ def run_model_inference(image: Image.Image):
         logits = outputs.logits
         probabilities = torch_module.nn.functional.softmax(logits, dim=-1)[0]
 
-    top5_probs, top5_indices = torch.topk(probabilities, 5)
+    top5_probs, top5_indices = torch_module.topk(probabilities, 5)
     latency_ms = round((time.time() - t0) * 1000, 1)
 
     best_idx = int(top5_indices[0].item())
@@ -177,6 +178,8 @@ async def predict_file(file: UploadFile = File(...)):
         contents = await file.read()
         image = Image.open(io.BytesIO(contents))
         return run_model_inference(image)
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Image processing error: {str(e)}")
 
@@ -202,6 +205,8 @@ async def predict_json(req: Base64PredictRequest):
             return run_model_inference(image)
         else:
             raise HTTPException(status_code=400, detail="Either image_base64 or sample_name is required.")
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Inference error: {str(e)}")
 
