@@ -1153,7 +1153,7 @@
           body: JSON.stringify(payload)
         });
         const data = await res.json();
-        const replyText = data.success ? data.reply : 'Unable to retrieve answer from AI service.';
+        const replyText = data.reply || (data.success ? '' : 'Unable to retrieve answer from AI service.');
         document.getElementById(botMsgId).textContent = replyText;
       } catch (err) {
         document.getElementById(botMsgId).textContent = 'Connection error contacting AI service.';
@@ -1207,7 +1207,7 @@
           })
         });
         const data = await res.json();
-        replyBox.textContent = data.success ? data.reply : 'AI service temporarily unavailable.';
+        replyBox.textContent = data.reply || 'AI service temporarily unavailable.';
       } catch (e) {
         replyBox.textContent = 'Error contacting AI Agronomist.';
       }
