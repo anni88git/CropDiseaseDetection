@@ -319,11 +319,18 @@ async def chat_with_bot(req: ChatRequest):
     import json
 
     
+    user_name = req.user_name or "Farmer"
+    user_purpose = req.user_purpose or "Crop Health & Disease Management"
+
     system_prompt = (
         f"You are Ksetrin AI, an intelligent agronomic and crop disease specialist. "
-        f"You are assisting {req.user_name}, whose primary purpose is {req.user_purpose}. "
-        "Provide direct, concise, and scientifically accurate agricultural advice. "
-        "Do not use emojis in your response. Keep answers concise, factual, and helpful."
+        f"You are assisting {user_name} ({user_purpose}). "
+        "Provide direct, scientifically sound, and field-actionable agricultural advice. "
+        "Structure answers clearly with: "
+        "1) Diagnosis / Cause summary, "
+        "2) Immediate Action & Treatment (certified organic and chemical options with exact application rates/dosages), "
+        "3) Preventative Field Measures. "
+        "Keep answers concise, direct, factual, and strictly under 180 words. Do not use emojis."
     )
 
     if req.diagnosis:
@@ -356,40 +363,50 @@ async def chat_with_bot(req: ChatRequest):
     elif req.context:
         system_prompt += f" Current leaf diagnosis context: {req.context}."
 
-    payload = {
-        "model": "llama-3.1-8b-instant",
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": req.message}
-        ],
-        "temperature": 0.6,
-        "max_tokens": 400
-    }
+    # Models confirmed active and supported on this Groq key
+    candidate_models = ["qwen/qwen3.8-27b", "openai/gpt-oss-120b"]
+    last_error = "Unknown error"
 
-    try:
-        url_req = urllib.request.Request(
-            "https://api.groq.com/openai/v1/chat/completions",
-            data=json.dumps(payload).encode("utf-8"),
-            headers={
-                "Authorization": f"Bearer {GROQ_API_KEY}",
-                "Content-Type": "application/json",
-                "User-Agent": "Mozilla/5.0"
-            }
-        )
-        with urllib.request.urlopen(url_req, timeout=20) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            reply = data["choices"][0]["message"]["content"]
-            return {"success": True, "reply": reply}
-    except urllib.error.HTTPError as e:
+    for model in candidate_models:
+        payload = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": req.message}
+            ],
+            "temperature": 0.2,
+            "max_tokens": 450
+        }
+
         try:
-            err_body = e.read().decode("utf-8")
-        except Exception:
-            err_body = str(e)
-        print(f"[Ksetrin] Groq API HTTP {e.code}: {err_body}")
-        return {"success": False, "reply": f"AI service error ({e.code}): {err_body[:200]}"}
-    except Exception as e:
-        print(f"[Ksetrin] Groq API error: {e}")
-        return {"success": False, "reply": f"AI service temporarily unavailable: {str(e)}"}
+            url_req = urllib.request.Request(
+                "https://api.groq.com/openai/v1/chat/completions",
+                data=json.dumps(payload).encode("utf-8"),
+                headers={
+                    "Authorization": f"Bearer {GROQ_API_KEY}",
+                    "Content-Type": "application/json",
+                    "User-Agent": "Mozilla/5.0"
+                }
+            )
+            with urllib.request.urlopen(url_req, timeout=15) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                reply = data["choices"][0]["message"]["content"]
+                if reply and reply.strip():
+                    return {"success": True, "reply": reply.strip()}
+        except urllib.error.HTTPError as e:
+            try:
+                err_body = e.read().decode("utf-8")
+            except Exception:
+                err_body = str(e)
+            print(f"[Ksetrin] Groq API {model} HTTP {e.code}: {err_body}")
+            last_error = f"HTTP {e.code}: {err_body[:200]}"
+            continue
+        except Exception as e:
+            print(f"[Ksetrin] Groq API {model} error: {e}")
+            last_error = str(e)
+            continue
+
+    return {"success": False, "reply": f"AI service temporarily unavailable: {last_error}"}
 
 # Mount images and samples directly so relative asset paths work from both root and subpaths
 images_path = os.path.join(STATIC_DIR, "images")
