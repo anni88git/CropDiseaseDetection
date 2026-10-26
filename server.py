@@ -91,6 +91,9 @@ app = FastAPI(title="Ksetrin Crop Disease Detection API", version="3.0.0")
 async def startup_event():
     import threading
     threading.Thread(target=load_vit_model, daemon=True).start()
+    key_status = f"{GROQ_API_KEY[:8]}..." if GROQ_API_KEY else "NOT SET"
+    print(f"[Ksetrin] Groq API key status: {key_status}")
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -312,7 +315,9 @@ GROQ_API_KEY = _get_groq_key()
 async def chat_with_bot(req: ChatRequest):
     """Chat endpoint powered by Groq LLM API with active leaf personalization."""
     import urllib.request
+    import urllib.error
     import json
+
     
     system_prompt = (
         f"You are Ksetrin AI, an intelligent agronomic and crop disease specialist. "
@@ -352,7 +357,7 @@ async def chat_with_bot(req: ChatRequest):
         system_prompt += f" Current leaf diagnosis context: {req.context}."
 
     payload = {
-        "model": "llama-3.3-70b-versatile",
+        "model": "llama-3.1-8b-instant",
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": req.message}
@@ -375,7 +380,15 @@ async def chat_with_bot(req: ChatRequest):
             data = json.loads(resp.read().decode("utf-8"))
             reply = data["choices"][0]["message"]["content"]
             return {"success": True, "reply": reply}
+    except urllib.error.HTTPError as e:
+        try:
+            err_body = e.read().decode("utf-8")
+        except Exception:
+            err_body = str(e)
+        print(f"[Ksetrin] Groq API HTTP {e.code}: {err_body}")
+        return {"success": False, "reply": f"AI service error ({e.code}): {err_body[:200]}"}
     except Exception as e:
+        print(f"[Ksetrin] Groq API error: {e}")
         return {"success": False, "reply": f"AI service temporarily unavailable: {str(e)}"}
 
 # Mount images and samples directly so relative asset paths work from both root and subpaths
