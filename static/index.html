@@ -685,19 +685,31 @@
           </button>
         </div>
 
+        <!-- Scan History -->
+        <div class="card">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+            <div class="card-title" style="margin:0;">Scan History</div>
+            <button type="button" onclick="clearHistory()" style="font-size:11px; font-weight:600; color:var(--danger); background:none; border:1px solid #fca5a5; border-radius:var(--radius-sm); padding:4px 10px; cursor:pointer;">Clear All</button>
+          </div>
+          <div id="history-list">
+            <div style="font-size:13px; color:var(--text-muted); text-align:center; padding:18px 0;">No scans yet. Run a diagnosis to see history here.</div>
+          </div>
+        </div>
+
         <div class="card">
           <div class="card-title">System Status</div>
           <div style="font-size:13px; line-height:1.6; color:var(--text-muted);">
-            • Model: Vision Transformer (ViT-Base-Patch16-224 · 98.97% Accuracy)<br />
-            • Coverage: Universal Multi-Crop Pathology (38 Classes)<br />
-            • Engine: PyTorch CPU + Groq Neural LLM<br />
-            • Host: Localhost:8080
+            &#x2022; Model: Vision Transformer (ViT-Base-Patch16-224 &middot; 98.97% Accuracy)<br />
+            &#x2022; Coverage: Universal Multi-Crop Pathology (38 Classes)<br />
+            &#x2022; AI Engine: Groq LLaMA 3.3 70B<br />
+            &#x2022; Server: Render Cloud
           </div>
           <button class="btn-outline" style="margin-top:16px; color:var(--danger); border-color:#fca5a5;" onclick="signOut()">
             <span>Sign Out</span>
           </button>
         </div>
       </section>
+
 
       <!-- Interactive Pathology Detail Modal -->
       <div id="pathology-modal" class="pathology-modal-overlay" style="display:none;" onclick="if(event.target===this) closePathologyModal()">
@@ -811,6 +823,7 @@
       checkUserProfile();
       loadSamples();
       loadCrops();
+      renderHistory();
     });
 
     // Check Profile in localStorage
@@ -999,6 +1012,7 @@
 
         if (result && result.success) {
           currentDiagnosis = result;
+          saveToHistory(result);
           renderDiagnosisResult(result);
         } else {
           alert('Diagnosis failed: ' + (result?.detail || 'Inference error'));
@@ -1326,6 +1340,74 @@
     function signOut() {
       localStorage.removeItem('ksetrin_user_profile');
       window.location.href = 'login.html';
+    }
+
+    // ── Keep-Alive: ping Render every 4 minutes to prevent cold starts ──
+    (function startKeepAlive() {
+      if (window.location.protocol === 'file:') return; // local dev: skip
+      const ping = () => fetch('/ping').catch(() => {});
+      ping();
+      setInterval(ping, 4 * 60 * 1000);
+    })();
+
+    // ── Scan History (localStorage) ──
+    const HISTORY_KEY = 'ksetrin_scan_history';
+
+    function getScanHistory() {
+      try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch { return []; }
+    }
+
+    function saveToHistory(result) {
+      const history = getScanHistory();
+      history.unshift({
+        id: Date.now(),
+        ts: new Date().toISOString(),
+        crop: result.crop,
+        condition: result.condition,
+        confidence: result.confidence,
+        is_healthy: result.is_healthy,
+        severity: result.severity || (result.is_healthy ? 'Normal' : 'Moderate')
+      });
+      // Keep last 50 entries
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 50)));
+      renderHistory();
+    }
+
+    function clearHistory() {
+      if (!confirm('Clear all scan history?')) return;
+      localStorage.removeItem(HISTORY_KEY);
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('history-list');
+      if (!container) return;
+      const history = getScanHistory();
+      if (!history.length) {
+        container.innerHTML = '<div style="font-size:13px; color:var(--text-muted); text-align:center; padding:18px 0;">No scans yet. Run a diagnosis to see history here.</div>';
+        return;
+      }
+      container.innerHTML = history.map(h => {
+        const date = new Date(h.ts);
+        const dateStr = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+        const badgeColor = h.is_healthy ? 'var(--success)' : 'var(--danger)';
+        const badgeBg   = h.is_healthy ? 'var(--success-bg)' : 'var(--danger-bg)';
+        const label     = h.is_healthy ? 'Healthy' : (h.severity || 'Disease');
+        return `
+          <div style="display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);">
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:13px; font-weight:700; color:var(--text-main); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${h.crop}</div>
+              <div style="font-size:12px; color:var(--text-muted); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${h.condition}</div>
+              <div style="font-size:11px; color:var(--text-light); margin-top:3px;">${dateStr} &middot; ${timeStr}</div>
+            </div>
+            <div style="text-align:right; flex-shrink:0;">
+              <span style="font-size:11px; font-weight:700; padding:3px 8px; border-radius:999px; background:${badgeBg}; color:${badgeColor};">${label}</span>
+              <div style="font-size:11px; font-weight:600; color:var(--text-muted); margin-top:4px;">${h.confidence}%</div>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
   </script>
 </body>

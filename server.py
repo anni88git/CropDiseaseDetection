@@ -274,6 +274,11 @@ async def health_check():
         "platform": "Ksetrin Smart Agriculture Studio"
     }
 
+@app.get("/ping")
+async def ping():
+    """Ultra-lightweight keep-alive endpoint to prevent Render free-tier cold starts."""
+    return {"pong": True}
+
 class AuthRequest(BaseModel):
     email: str
     password: Optional[str] = None
@@ -347,7 +352,7 @@ async def chat_with_bot(req: ChatRequest):
         system_prompt += f" Current leaf diagnosis context: {req.context}."
 
     payload = {
-        "model": "qwen/qwen3.8-27b",
+        "model": "llama-3.3-70b-versatile",
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": req.message}
@@ -366,7 +371,7 @@ async def chat_with_bot(req: ChatRequest):
                 "User-Agent": "Mozilla/5.0"
             }
         )
-        with urllib.request.urlopen(url_req, timeout=15) as resp:
+        with urllib.request.urlopen(url_req, timeout=20) as resp:
             data = json.loads(resp.read().decode("utf-8"))
             reply = data["choices"][0]["message"]["content"]
             return {"success": True, "reply": reply}
