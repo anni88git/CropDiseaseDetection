@@ -1,3 +1,4 @@
+import requests
 import os
 import time
 import io
@@ -89,8 +90,7 @@ app = FastAPI(title="Ksetrin Crop Disease Detection API", version="3.0.0")
 
 @app.on_event("startup")
 async def startup_event():
-    import threading
-    threading.Thread(target=load_vit_model, daemon=True).start()
+    print("[Ksetrin] Fast inference routed to Hugging Face Space (https://ruougishiki-cropdiseasedetection.hf.space)")
     key_status = f"{GROQ_API_KEY[:8]}..." if GROQ_API_KEY else "NOT SET"
     print(f"[Ksetrin] Groq API key status: {key_status}")
 
@@ -103,87 +103,33 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+HF_INFERENCE_URL = "https://ruougishiki-cropdiseasedetection.hf.space/api/predict"
+
 def run_model_inference(image: Image.Image):
-    """Execute Vision Transformer (ViT-Base-Patch16-224) inference with high performance."""
-    global model, processor, torch_module, model_loading
-    
-    if model is None or processor is None:
-        if model_loading:
-            raise HTTPException(
-                status_code=503,
-                detail="Vision Transformer is currently warming up and downloading model weights. Please retry in 10-15 seconds."
-            )
-        # Attempt immediate load if not already started
-        load_vit_model()
-        if model is None or processor is None:
-            err_msg = f"Vision Transformer initialization error: {model_error}" if model_error else "Vision Transformer is initializing or weights are still being cached. Please retry shortly."
-            raise HTTPException(
-                status_code=503, 
-                detail=err_msg
-            )
-    
+    """Execute Vision Transformer inference via high-speed Hugging Face Space (2 vCPU · 16 GB RAM)."""
     if image.mode != "RGB":
         image = image.convert("RGB")
-    
-    # Fast bilinear thumbnail if image is very large (e.g. 12-48MP camera uploads)
-    # The ViT processor accepts 224x224, so pre-scaling avoids massive PIL bicubic interpolation time
+
     if image.width > 384 or image.height > 384:
         image.thumbnail((384, 384), Image.Resampling.BILINEAR)
 
-    t0 = time.time()
-    inputs = processor(images=image, return_tensors="pt")
-    with torch_module.inference_mode():
-        outputs = model(**inputs)
-        logits = outputs.logits
-        probabilities = torch_module.nn.functional.softmax(logits, dim=-1)[0]
+    buf = io.BytesIO()
+    image.save(buf, format="JPEG", quality=90)
+    buf.seek(0)
 
-    top5_probs, top5_indices = torch_module.topk(probabilities, 5)
-    latency_ms = round((time.time() - t0) * 1000, 1)
-
-    best_idx = int(top5_indices[0].item())
-    best_class = model.config.id2label[best_idx] if hasattr(model.config, 'id2label') and best_idx in model.config.id2label else CLASS_NAMES[best_idx]
-    confidence = float(top5_probs[0].item() * 100.0)
-
-    top5 = []
-    for prob, idx in zip(top5_probs, top5_indices):
-        c_idx = int(idx.item())
-        cls_name = model.config.id2label[c_idx] if hasattr(model.config, 'id2label') and c_idx in model.config.id2label else CLASS_NAMES[c_idx]
-        cls_info = get_disease_info(cls_name)
-        top5.append({
-            "class_name": cls_name,
-            "crop": cls_info['crop'],
-            "condition": cls_info['condition'],
-            "confidence": round(float(prob.item() * 100.0), 2),
-            "is_healthy": cls_info['is_healthy']
-        })
-
-    disease_data = get_disease_info(best_class)
-    is_unknown = confidence < 60.0
-
-    return {
-        "success": True,
-        "predicted_class": best_class,
-        "crop": disease_data['crop'],
-        "condition": disease_data['condition'],
-        "is_healthy": disease_data['is_healthy'],
-        "confidence": round(confidence, 2),
-        "confidence_level": "High" if confidence >= 85 else ("Moderate" if confidence >= 65 else "Low"),
-        "is_unknown": is_unknown,
-        "severity": disease_data['severity'],
-        "pathogen": disease_data['pathogen'],
-        "description": disease_data['description'],
-        "symptoms": disease_data['symptoms'],
-        "organic_treatment": disease_data['organic_treatment'],
-        "chemical_treatment": disease_data['chemical_treatment'],
-        "prevention": disease_data['prevention'],
-        "top5": top5,
-        "telemetry": {
-            "latency_ms": latency_ms,
-            "input_resolution": f"{image.width}x{image.height}",
-            "model_architecture": "Vision Transformer (ViT-Base-Patch16-224 · 98.97% Accuracy)",
-            "classes_evaluated": len(CLASS_NAMES)
-        }
-    }
+    try:
+        res = requests.post(
+            HF_INFERENCE_URL,
+            files={"file": ("leaf.jpg", buf, "image/jpeg")},
+            timeout=25
+        )
+        if res.status_code == 200:
+            return res.json()
+        raise HTTPException(status_code=res.status_code, detail=f"Inference error from Hugging Face Space: {res.text}")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Inference gateway error: {str(e)}")
 
 class Base64PredictRequest(BaseModel):
     image_base64: Optional[str] = None
