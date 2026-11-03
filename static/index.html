@@ -813,6 +813,8 @@
 
   <script>
     const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:8080' : '';
+    // Ultra-fast Vision Transformer inference hosted on Hugging Face Spaces (2 vCPU · 16 GB RAM)
+    const HF_INFERENCE_BASE = 'https://ruougishiki-cropdiseasedetection.hf.space';
     let currentFile = null;
     let currentSample = null;
     let currentDiagnosis = null;
@@ -994,7 +996,7 @@
       try {
         let result = null;
         if (currentSample) {
-          const res = await fetch(API_BASE + '/api/predict/json', {
+          const res = await fetch(HF_INFERENCE_BASE + '/api/predict/json', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sample_name: currentSample })
@@ -1003,7 +1005,7 @@
         } else if (currentFile) {
           const form = new FormData();
           form.append('file', currentFile);
-          const res = await fetch(API_BASE + '/api/predict', {
+          const res = await fetch(HF_INFERENCE_BASE + '/api/predict', {
             method: 'POST',
             body: form
           });
