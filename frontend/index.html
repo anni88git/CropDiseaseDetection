@@ -817,7 +817,7 @@
     // const BACKEND_URL = 'https://ksetrin-backend.onrender.com';
     const BACKEND_URL = window.location.protocol === 'file:'
       ? 'http://localhost:8080'
-      : 'https://YOUR-RENDER-BACKEND.onrender.com';
+      : 'https://cropdiseasedetection-1-fqro.onrender.com';
     const API_BASE = BACKEND_URL;
     // Ultra-fast Vision Transformer inference hosted on Hugging Face Spaces (2 vCPU · 16 GB RAM)
     const HF_INFERENCE_BASE = 'https://ruougishiki-cropdiseasedetection.hf.space';
@@ -935,11 +935,19 @@
       }).join('');
     }
 
-    // Select Sample
-    function selectTestSample(filename, imgUrl) {
-      currentSample = filename;
+    // Select Sample — fetch image from Vercel static and upload as file to HF Space
+    async function selectTestSample(filename, imgUrl) {
+      currentSample = null;
       currentFile = null;
       showPreview(imgUrl);
+      try {
+        const res = await fetch(imgUrl);
+        const blob = await res.blob();
+        currentFile = new File([blob], filename, { type: blob.type || 'image/jpeg' });
+      } catch(e) {
+        alert('Could not load sample image: ' + e.message);
+        return;
+      }
       executeInference();
     }
 
